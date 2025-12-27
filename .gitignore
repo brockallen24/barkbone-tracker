@@ -13,3 +13,6 @@ Thumbs.db
 
 # Environment variables (will contain Airtable API key)
 .env
+
+# Airtable configuration with API key
+config.js
