@@ -1,0 +1,3344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Layout - Inventory System</title>
+    <!-- JsBarcode Library -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+            overflow: auto;
+        }
+
+        .container {
+            max-width: 98%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.2em;
+        }
+        
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #dee2e6;
+            justify-content: center;
+        }
+        
+        .tab-button {
+            padding: 12px 30px;
+            background: #e9ecef;
+            border: none;
+            border-radius: 10px 10px 0 0;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #495057;
+        }
+        
+        .tab-button:hover {
+            background: #dee2e6;
+        }
+        
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(3px);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Zoom Controls */
+        .zoom-controls {
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .zoom-btn {
+            display: block;
+            width: 50px;
+            height: 50px;
+            margin: 5px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .zoom-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .zoom-level {
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        /* Warehouse Layout Container */
+        .warehouse-layout {
+            width: 100%;
+            max-width: 1600px;
+            margin: 20px auto;
+            transition: transform 0.3s ease;
+            transform-origin: top center;
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 0.7fr 0.7fr 1.3fr 1.3fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 20px;
+            height: 800px;
+        }
+
+        /* Far left section (MRB + Shipped stacked) */
+        .far-left-section {
+            grid-column: 1;
+            grid-row: 1 / 3;
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            gap: 20px;
+            min-width: 280px;
+        }
+
+        /* Middle left section (Manufacturing + Warehouse 1) */
+        .middle-left-section {
+            grid-column: 2;
+            grid-row: 1 / 3;
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            gap: 20px;
+            min-width: 280px;
+        }
+
+        /* Top right (Warehouse 2) */
+        .top-right-section {
+            grid-column: 3;
+            grid-row: 1;
+        }
+
+        /* Bottom right (Warehouse 4 + Warehouse 3) */
+        .bottom-right-section {
+            grid-column: 3;
+            grid-row: 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Far right section */
+
+
+        /* Location boxes */
+        .location-box {
+            background: #f8f9fa;
+            border: 4px solid #495057;
+            border-radius: 10px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s;
+            min-height: 0;
+            position: relative;
+        }
+        
+        .location-box:not(.maximized) {
+            cursor: pointer;
+        }
+        
+        .location-box:hover {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+            transform: scale(1.01);
+        }
+        
+        .location-box.auto-fit {
+            overflow: visible;
+        }
+        
+        /* Maximized location styles */
+        .location-box.maximized {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10000;
+            border-radius: 0;
+            max-width: 100%;
+            max-height: 100%;
+            cursor: default;
+            animation: expandLocation 0.3s ease-out;
+        }
+        
+        @keyframes expandLocation {
+            from {
+                transform: scale(0.3);
+                opacity: 0.5;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .location-box.maximized .location-header {
+            padding: 25px;
+            font-size: 1.5em;
+        }
+        
+        .location-box.maximized .items-area {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            padding: 30px;
+            max-height: none;
+            overflow-y: auto;
+            pointer-events: auto;
+        }
+        
+        .location-box.maximized .inventory-item {
+            font-size: 1em;
+            padding: 15px;
+            margin-bottom: 0;
+        }
+        
+        .location-box.maximized .location-summary {
+            padding: 20px;
+            margin: 0 30px 30px 30px;
+            font-size: 1.1em;
+        }
+        
+        .maximize-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            display: none;
+            pointer-events: none;
+        }
+        
+        .maximize-overlay.show {
+            display: block;
+        }
+        
+        /* Mini location indicators when one is maximized */
+        .mini-locations {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            z-index: 10001;
+            background: white;
+            padding: 20px 25px 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            max-width: 90%;
+            border: 3px solid #667eea;
+        }
+        
+        .mini-locations.show, .mini-locations.active {
+            display: flex;
+        }
+        
+        .mini-locations::before {
+            content: '📦 Drag to Move | Click Active Location (✔) to Close';
+            position: absolute;
+            top: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.8em;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .mini-location {
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border: 2px solid #495057;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .mini-location:hover {
+            background: #495057;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+        }
+        
+        .mini-location.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: 3px solid #fff;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+            transform: scale(1.1);
+            font-weight: 700;
+        }
+        
+        .mini-location.active::after {
+            content: ' ✔';
+            font-size: 1.2em;
+            margin-left: 5px;
+        }
+        
+        .mini-location.active:hover::after {
+            content: ' ✖';
+        }
+        
+        .mini-location.active:hover {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            cursor: pointer;
+            transform: scale(1.15);
+        }
+        
+        .mini-location.active:hover::before {
+            content: 'Click to Close: ';
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+        
+        .mini-location.drag-over {
+            background: #2196f3 !important;
+            border-color: #2196f3 !important;
+            box-shadow: 0 0 20px rgba(33, 150, 243, 0.7) !important;
+            transform: scale(1.15) !important;
+            color: white !important;
+        }
+        
+        /* Color coding for different locations */
+        .mini-location[data-location="mrb"] { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; border-color: #c0392b; }
+        .mini-location[data-location="shipped"] { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border-color: #2980b9; }
+        .mini-location[data-location="manufacturing-floor"] { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; border-color: #8e44ad; }
+
+        .mini-location[data-location^="warehouse"] { background: linear-gradient(135deg, #16a085 0%, #138d75 100%); color: white; border-color: #138d75; }
+        
+        /* Close button for maximized views */
+        .close-maximized {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: 3px solid white;
+            padding: 18px 30px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.2em;
+            cursor: pointer;
+            z-index: 10002;
+            box-shadow: 0 8px 24px rgba(231, 76, 60, 0.6);
+            transition: all 0.3s;
+            display: none;
+            animation: pulseClose 2s infinite;
+        }
+        
+        @keyframes pulseClose {
+            0%, 100% {
+                box-shadow: 0 8px 24px rgba(231, 76, 60, 0.6);
+            }
+            50% {
+                box-shadow: 0 8px 32px rgba(231, 76, 60, 0.9);
+            }
+        }
+        
+        .close-maximized.show {
+            display: block;
+        }
+        
+        .close-maximized:hover {
+            transform: scale(1.15) rotate(-5deg);
+            box-shadow: 0 12px 32px rgba(231, 76, 60, 0.8);
+            background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+        }
+        
+        .close-maximized::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            bottom: -8px;
+            left: -8px;
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.3) 0%, rgba(192, 57, 43, 0.3) 100%);
+            border-radius: 15px;
+            z-index: -1;
+            animation: glowPulse 2s infinite;
+        }
+        
+        @keyframes glowPulse {
+            0%, 100% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+        }
+        
+        .close-maximize-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 10001;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+        
+        .close-maximize-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+        
+        .expand-hint {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.75em;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .location-box:hover .expand-hint {
+            opacity: 1;
+        }
+
+        .location-box.drag-over {
+            border-color: #667eea;
+            border-width: 6px;
+            background: #e8f0ff;
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .location-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px;
+            text-align: center;
+        }
+
+        .location-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .items-area {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: white;
+            margin: 15px;
+            border-radius: 8px;
+            border: 2px dashed #dee2e6;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .items-area.auto-fit {
+            overflow-y: visible;
+        }
+        
+        .items-area.auto-fit .inventory-item {
+            font-size: 0.75em;
+            padding: 8px;
+            margin-bottom: 6px;
+        }
+        
+        .items-area.auto-fit .item-header {
+            font-size: 0.95em;
+        }
+        
+        .items-area.auto-fit .item-details {
+            font-size: 0.85em;
+        }
+
+        .items-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .items-area::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .items-area::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .items-area:empty::before {
+            content: 'Drop items here';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #adb5bd;
+            font-style: italic;
+        }
+
+        /* Inventory Items */
+        .inventory-item {
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: grab;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 0.85em;
+            flex-shrink: 0;
+        }
+        
+        .pallet-badge {
+            display: inline-block;
+            background: rgba(0,0,0,0.15);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-left: 5px;
+            font-weight: normal;
+        }
+
+        .inventory-item:active {
+            cursor: grabbing;
+        }
+
+        .inventory-item.dragging {
+            opacity: 0.4;
+            transform: rotate(3deg) scale(0.95);
+            cursor: grabbing;
+        }
+        
+        /* Search highlight animation */
+        @keyframes blink {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 30px rgba(255, 235, 59, 0.9), 0 0 60px rgba(33, 150, 243, 0.6);
+                border-color: #2196f3;
+                border-width: 3px;
+            }
+            25% {
+                transform: scale(1.03);
+                box-shadow: 0 0 40px rgba(33, 150, 243, 1), 0 0 80px rgba(255, 235, 59, 0.8);
+                border-color: #ffeb3b;
+                border-width: 4px;
+            }
+            50% { 
+                transform: scale(1.06);
+                box-shadow: 0 0 50px rgba(255, 235, 59, 1), 0 0 100px rgba(33, 150, 243, 0.9);
+                border-color: #ffc107;
+                border-width: 5px;
+            }
+            75% {
+                transform: scale(1.03);
+                box-shadow: 0 0 40px rgba(33, 150, 243, 1), 0 0 80px rgba(255, 235, 59, 0.8);
+                border-color: #ffeb3b;
+                border-width: 4px;
+            }
+        }
+        
+        .inventory-item.highlight {
+            animation: blink 0.8s ease-in-out infinite;
+            position: relative;
+            z-index: 100;
+            border-style: solid;
+        }
+
+        .inventory-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .inventory-item.raw-material {
+            background: #ff6b6b;
+            color: white;
+            border-color: #c92a2a;
+        }
+
+        .inventory-item.wip {
+            background: #ffd93d;
+            color: #333;
+            border-color: #d4a500;
+        }
+
+        .inventory-item.finished-good {
+            background: #51cf66;
+            color: white;
+            border-color: #2b8a3e;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .item-part-number {
+            font-size: 1.1em;
+        }
+
+        .item-details {
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        /* Summary Box */
+        .location-summary {
+            background: white;
+            padding: 12px;
+            margin: 0 15px 15px 15px;
+            border-radius: 8px;
+            border: 2px solid #495057;
+            font-size: 0.8em;
+        }
+
+        .summary-title {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+            color: #495057;
+        }
+
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 8px;
+            margin: 2px 0;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .summary-line.raw {
+            background: #ffe0e0;
+            border-left: 3px solid #ff6b6b;
+        }
+
+        .summary-line.wip {
+            background: #fff9e0;
+            border-left: 3px solid #ffd93d;
+        }
+
+        .summary-line.finished {
+            background: #e0ffe0;
+            border-left: 3px solid #51cf66;
+        }
+
+        .summary-line.total {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            font-weight: bold;
+            margin-top: 5px;
+            padding: 6px 8px;
+        }
+
+        /* Login styles - keeping from original */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .login-overlay.hidden {
+            display: none;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h2 {
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .login-form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .login-form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .login-form-group input {
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .btn-login {
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .login-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        .user-info {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 999;
+        }
+
+        .user-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+
+        .user-badge.admin {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-logout {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        /* Search Section */
+        .search-section {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        /* Manual Move Section */
+        .move-section {
+            background: #fff3e0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .move-section h3 {
+            margin-bottom: 15px;
+            color: #e65100;
+        }
+        
+        .move-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .move-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .move-group label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .move-group input,
+        .move-group select {
+            padding: 12px;
+            border: 2px solid #ff9800;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .move-group input:focus,
+        .move-group select:focus {
+            outline: none;
+            border-color: #f57c00;
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
+        }
+        
+        .btn-move {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            height: fit-content;
+        }
+        
+        .btn-move:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+        
+        .move-result {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 5px;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .move-result.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .move-result.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .search-section h3 {
+            margin-bottom: 15px;
+            color: #1565c0;
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #2196f3;
+            border-radius: 25px;
+            font-size: 1.1em;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+        }
+        
+        .btn-search {
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+        
+        .btn-clear {
+            background: #6c757d;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-clear:hover {
+            background: #5a6268;
+        }
+        
+        .search-results {
+            margin-top: 15px;
+            font-size: 0.95em;
+            color: #1976d2;
+        }
+        
+        .search-results-header {
+            font-weight: 700;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            color: #1565c0;
+        }
+        
+        .search-result-item {
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: white;
+            border-left: 4px solid #2196f3;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .search-result-info {
+            flex: 1;
+        }
+        
+        .search-result-stats {
+            text-align: right;
+            margin-left: 15px;
+            font-weight: 600;
+        }
+        
+        .search-summary {
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .summary-row:last-child {
+            border-bottom: none;
+            font-size: 1.2em;
+            margin-top: 5px;
+            padding-top: 10px;
+            border-top: 2px solid rgba(255,255,255,0.5);
+        }
+        
+        .auto-fit-toggle {
+            position: fixed;
+            top: 300px;
+            right: 30px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .toggle-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .toggle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+        
+        .toggle-btn.off {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+        }
+        
+        /* History Tab Styles */
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .chart-card h3 {
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        .transaction-log {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .transaction-log h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .transaction-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .transaction-table th,
+        .transaction-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .transaction-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .transaction-table tbody {
+            display: block;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .transaction-table thead,
+        .transaction-table tbody tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+        
+        .filter-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .filter-section label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .filter-section select {
+            padding: 8px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .control-group label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .control-group input,
+        .control-group select {
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .permission-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 10000;
+            text-align: center;
+            display: none;
+        }
+
+        .permission-message.show {
+            display: block;
+        }
+
+        .permission-message h3 {
+            color: #dc3545;
+            margin-bottom: 15px;
+        }
+
+        .btn-ok {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .overlay-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            display: none;
+        }
+
+        .overlay-backdrop.show {
+            display: block;
+        }
+
+
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-container">
+            <div class="login-header">
+                <h2>🔐 Warehouse Login</h2>
+                <p>Please enter your credentials</p>
+            </div>
+            <div class="login-error" id="loginError">Invalid username or password</div>
+            <form class="login-form" id="loginForm">
+                <div class="login-form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="login-form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn-login">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Permission Message -->
+    <div class="overlay-backdrop" id="overlayBackdrop"></div>
+    <div class="permission-message" id="permissionMessage">
+        <h3>⛔ Access Denied</h3>
+        <p>You do not have permission to perform this action.</p>
+        <p><strong>Contact Admin for permission.</strong></p>
+        <button class="btn-ok" onclick="closePermissionMessage()">OK</button>
+    </div>
+
+    <!-- Maximize Overlay -->
+    <div class="maximize-overlay" id="maximizeOverlay"></div>
+    
+    <!-- Close Button (shown when maximized) -->
+    <button class="close-maximized" id="closeMaximized" onclick="closeMaximizedLocation()" title="Close and return to all locations view">
+        ✖ Close
+    </button>
+    
+    <!-- Mini Location Bar (shown when maximized) -->
+    <div class="mini-locations" id="miniLocations">
+        <div class="mini-location" data-location="mrb" onclick="handleMiniLocationClick('mrb')">MRB</div>
+        <div class="mini-location" data-location="shipped" onclick="handleMiniLocationClick('shipped')">Shipped</div>
+        <div class="mini-location" data-location="manufacturing-floor" onclick="handleMiniLocationClick('manufacturing-floor')">Manufacturing</div>
+        <div class="mini-location" data-location="warehouse-1" onclick="handleMiniLocationClick('warehouse-1')">Warehouse 1</div>
+        <div class="mini-location" data-location="warehouse-2" onclick="handleMiniLocationClick('warehouse-2')">Warehouse 2</div>
+        <div class="mini-location" data-location="warehouse-3" onclick="handleMiniLocationClick('warehouse-3')">Warehouse 3</div>
+        <div class="mini-location" data-location="warehouse-4" onclick="handleMiniLocationClick('warehouse-4')">Warehouse 4</div>
+    </div>
+    
+    <!-- Main Container -->
+    <div class="container" id="mainContainer" style="display: none;">
+        <!-- User Info -->
+        <div class="user-info">
+            <div class="user-badge" id="userBadge"></div>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+
+        <h1>🏭 Warehouse Layout - Inventory System</h1>
+        
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <button class="tab-button active" onclick="switchTab('warehouse')">📦 Warehouse</button>
+            <button class="tab-button" onclick="switchTab('history')">📊 History</button>
+        </div>
+
+        <!-- Zoom Controls -->
+        <div class="zoom-controls">
+            <button class="zoom-btn" onclick="zoomIn()">+</button>
+            <div class="zoom-level" id="zoomLevel">100%</div>
+            <button class="zoom-btn" onclick="zoomOut()">−</button>
+        </div>
+        
+        <!-- Auto-Fit Toggle -->
+        <div class="auto-fit-toggle">
+            <button class="toggle-btn" id="autoFitBtn" onclick="toggleAutoFit()">📐 Auto-Fit: OFF</button>
+        </div>
+
+        <!-- Warehouse Tab -->
+        <div id="warehouse-tab" class="tab-content active">
+        
+        <!-- Search Section -->
+        <div class="search-section">
+            <h3>🔍 Search Inventory</h3>
+            <p style="color: #1565c0; font-size: 0.9em; margin-bottom: 10px;">
+                <strong>💡 Tip:</strong> Search works for BOTH part numbers AND transaction numbers. Matching items will blink!
+            </p>
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by part number or transaction number...">
+                <button onclick="searchParts()" class="btn-search">🔍 Search</button>
+                <button onclick="clearSearch()" class="btn-clear">✖ Clear</button>
+            </div>
+            <div id="searchResults" class="search-results"></div>
+        </div>
+        
+        <!-- Manual Move Section -->
+        <div class="move-section">
+            <h3>📦 Manual Move Item</h3>
+            <p style="color: #e65100; font-size: 0.9em; margin-bottom: 10px;">
+                <strong>💡 Tip:</strong> Enter transaction number to move item to a different location.
+            </p>
+            <div class="move-container">
+                <div class="move-group">
+                    <label for="moveTransactionNumber">Transaction Number *</label>
+                    <input type="text" id="moveTransactionNumber" placeholder="Enter TXN number..." required>
+                </div>
+                <div class="move-group">
+                    <label for="moveToLocation">Move To *</label>
+                    <select id="moveToLocation" required>
+                        <option value="">Select Destination</option>
+                        <option value="mrb">MRB</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="manufacturing-floor">Manufacturing</option>
+                        <option value="warehouse-1">Warehouse 1</option>
+                        <option value="warehouse-2">Warehouse 2</option>
+                        <option value="warehouse-3">Warehouse 3</option>
+                        <option value="warehouse-4">Warehouse 4</option>
+                    </select>
+                </div>
+                <button onclick="manualMoveItem()" class="btn-move">Move Item</button>
+            </div>
+            <div id="moveResult" class="move-result"></div>
+        </div>
+        
+        <!-- Add Item Control Panel -->
+        <div class="control-panel">
+            <h3>➕ Add New Item</h3>
+            <form id="itemForm">
+                <div class="control-grid">
+                    <div class="control-group">
+                        <label>Part Number *</label>
+                        <input type="text" id="partNumber" required>
+                    </div>
+                    <div class="control-group">
+                        <label>Description *</label>
+                        <input type="text" id="partDescription" required>
+                    </div>
+                    <div class="control-group">
+                        <label>Amount per Pallet *</label>
+                        <input type="number" id="amount" min="1" required>
+                    </div>
+                    <div class="control-group">
+                        <label>Number of Like Pallets *</label>
+                        <input type="number" id="palletCount" min="1" value="1" required>
+                    </div>
+                    <div class="control-group">
+                        <label>Date *</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    <div class="control-group">
+                        <label>Operator *</label>
+                        <input type="text" id="operatorNumber" required>
+                    </div>
+                    <div class="control-group">
+                        <label>Cost ($) *</label>
+                        <input type="number" id="partCost" step="0.01" min="0" required>
+                    </div>
+                    <div class="control-group">
+                        <label>Type *</label>
+                        <select id="partType" required>
+                            <option value="">Select Type</option>
+                            <option value="raw-material">Raw Material</option>
+                            <option value="wip">WIP</option>
+                            <option value="finished-good">Finished Good</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Location *</label>
+                        <select id="location" required>
+                            <option value="">Select Location</option>
+                            <option value="mrb">MRB</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="manufacturing-floor">Manufacturing</option>
+                            <option value="warehouse-1">Warehouse 1</option>
+                            <option value="warehouse-2">Warehouse 2</option>
+                            <option value="warehouse-3">Warehouse 3</option>
+                            <option value="warehouse-4">Warehouse 4</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Add Item(s)</button>
+            </form>
+        </div>
+
+        <!-- Warehouse Layout -->
+        <div class="warehouse-layout" id="warehouseLayout">
+            <div class="layout-grid">
+                <!-- Far Left Section (MRB + Shipped stacked) -->
+                <div class="far-left-section">
+                    <!-- MRB -->
+                    <div class="location-box" id="mrb-box" onclick="toggleMaximize('mrb-box', event)">
+                        <div class="expand-hint">Click to expand</div>
+                        <div class="location-header">
+                            <div class="location-title">MRB</div>
+                        </div>
+                        <div class="items-area" id="mrb-items"></div>
+                        <div class="location-summary" id="mrb-summary"></div>
+                    </div>
+
+                    <!-- Shipped -->
+                    <div class="location-box" id="shipped-box" onclick="toggleMaximize('shipped-box', event)">
+                        <div class="expand-hint">Click to expand</div>
+                        <div class="location-header">
+                            <div class="location-title">Shipped</div>
+                        </div>
+                        <div class="items-area" id="shipped-items"></div>
+                        <div class="location-summary" id="shipped-summary"></div>
+                    </div>
+                </div>
+
+                <!-- Middle Left Section (Manufacturing + Warehouse 1) -->
+                <div class="middle-left-section">
+                    <!-- Manufacturing -->
+                    <div class="location-box" id="manufacturing-floor-box" onclick="toggleMaximize('manufacturing-floor-box', event)">
+                        <div class="expand-hint">Click to expand</div>
+                        <div class="location-header">
+                            <div class="location-title">Manufacturing</div>
+                        </div>
+                        <div class="items-area" id="manufacturing-floor-items"></div>
+                        <div class="location-summary" id="manufacturing-floor-summary"></div>
+                    </div>
+
+                    <!-- Warehouse 1 -->
+                    <div class="location-box" id="warehouse-1-box" onclick="toggleMaximize('warehouse-1-box', event)">
+                        <div class="expand-hint">Click to expand</div>
+                        <div class="location-header">
+                            <div class="location-title">Warehouse 1</div>
+                        </div>
+                        <div class="items-area" id="warehouse-1-items"></div>
+                        <div class="location-summary" id="warehouse-1-summary"></div>
+                    </div>
+                </div>
+
+                <!-- Top Right (Warehouse 2) -->
+                <div class="top-right-section">
+                    <div class="location-box" id="warehouse-2-box" onclick="toggleMaximize('warehouse-2-box', event)">
+                        <div class="expand-hint">Click to expand</div>
+                        <div class="location-header">
+                            <div class="location-title">Warehouse 2</div>
+                        </div>
+                        <div class="items-area" id="warehouse-2-items"></div>
+                        <div class="location-summary" id="warehouse-2-summary"></div>
+                    </div>
+                </div>
+
+                <!-- Bottom Right (Warehouse 4 + Warehouse 3) -->
+                <div class="bottom-right-section">
+                    <!-- Warehouse 4 -->
+                    <div class="location-box" id="warehouse-4-box" onclick="toggleMaximize('warehouse-4-box', event)">
+                        <div class="expand-hint">Click to expand</div>
+                        <div class="location-header">
+                            <div class="location-title">Warehouse 4</div>
+                        </div>
+                        <div class="items-area" id="warehouse-4-items"></div>
+                        <div class="location-summary" id="warehouse-4-summary"></div>
+                    </div>
+
+                    <!-- Warehouse 3 -->
+                    <div class="location-box" id="warehouse-3-box" onclick="toggleMaximize('warehouse-3-box', event)">
+                        <div class="expand-hint">Click to expand</div>
+                        <div class="location-header">
+                            <div class="location-title">Warehouse 3</div>
+                        </div>
+                        <div class="items-area" id="warehouse-3-items"></div>
+                        <div class="location-summary" id="warehouse-3-summary"></div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+        
+        </div>
+        <!-- End Warehouse Tab -->
+        
+        <!-- History Tab -->
+        <div id="history-tab" class="tab-content">
+            <h2>📊 Transaction History & Analytics</h2>
+            
+            <!-- Stats Summary -->
+            <div class="stats-summary">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalTransactions">0</div>
+                    <div class="stat-label">Total Items</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalPallets">0</div>
+                    <div class="stat-label">Total Pallets</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalValue">$0.00</div>
+                    <div class="stat-label">Total Inventory Value</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalUnits">0</div>
+                    <div class="stat-label">Total Units</div>
+                </div>
+            </div>
+            
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <label for="chartPeriod">View Period:</label>
+                <select id="chartPeriod" onchange="updateCharts()">
+                    <option value="daily">Daily (Last 7 Days)</option>
+                    <option value="weekly">Weekly (Last 8 Weeks)</option>
+                    <option value="monthly">Monthly (Last 12 Months)</option>
+                </select>
+            </div>
+            
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <div class="chart-card">
+                    <h3>Inventory Value by Type</h3>
+                    <div class="chart-container">
+                        <canvas id="valueChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Units by Type</h3>
+                    <div class="chart-container">
+                        <canvas id="unitsChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Inventory Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Transaction Log -->
+            <div class="transaction-log">
+                <h3>📋 All Transactions (Chronological Order: Earliest to Most Recent)</h3>
+                <div style="overflow-x: auto;">
+                    <table class="transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Part Number</th>
+                                <th>Description</th>
+                                <th>Type</th>
+                                <th>Pallet</th>
+                                <th>Amount</th>
+                                <th>Cost</th>
+                                <th>Total Value</th>
+                                <th>Operator</th>
+                                <th>Location</th>
+                                <th>User</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionTableBody">
+                            <!-- Transactions will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- End History Tab -->
+        
+    </div>
+
+    <script>
+        // User authentication
+        const users = {
+            'Admin1': {
+                password: 'ADMIN1',
+                role: 'admin',
+                displayName: 'Admin1'
+            },
+            'Frank Thomas': {
+                password: 'Frank1',
+                role: 'user',
+                displayName: 'Frank Thomas'
+            }
+        };
+
+        let currentUser = null;
+        let zoomLevel = 100;
+        let autoFitEnabled = false;
+        let valueChart, unitsChart, pieChart;
+
+        // Inventory data
+        let inventory = {
+            'mrb': [],
+            'shipped': [],
+            'manufacturing-floor': [],
+            'warehouse-1': [],
+            'warehouse-2': [],
+            'warehouse-3': [],
+            'warehouse-4': []
+        };
+
+        const locationNames = {
+            'mrb': 'MRB',
+            'shipped': 'Shipped',
+            'manufacturing-floor': 'Manufacturing',
+            'warehouse-1': 'Warehouse 1',
+            'warehouse-2': 'Warehouse 2',
+            'warehouse-3': 'Warehouse 3',
+            'warehouse-4': 'Warehouse 4'
+        };
+
+        const typeLabels = {
+            'raw-material': 'Raw Material',
+            'wip': 'WIP',
+            'finished-good': 'Finished Good'
+        };
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+
+            if (users[username] && users[username].password === password) {
+                currentUser = {
+                    username: username,
+                    role: users[username].role,
+                    displayName: users[username].displayName
+                };
+                sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('mainContainer').style.display = 'block';
+                updateUIForRole();
+                this.reset();
+                errorDiv.classList.remove('show');
+                initInventory();
+            } else {
+                errorDiv.classList.add('show');
+                document.getElementById('password').value = '';
+            }
+        });
+
+        function logout() {
+            currentUser = null;
+            sessionStorage.removeItem('currentUser');
+            document.getElementById('loginOverlay').classList.remove('hidden');
+            document.getElementById('mainContainer').style.display = 'none';
+        }
+
+        function updateUIForRole() {
+            const userBadge = document.getElementById('userBadge');
+            if (currentUser.role === 'admin') {
+                userBadge.textContent = '👑 ' + currentUser.displayName + ' (Admin)';
+                userBadge.classList.add('admin');
+            } else {
+                userBadge.textContent = '👤 ' + currentUser.displayName;
+                userBadge.classList.remove('admin');
+            }
+        }
+
+        function checkPermission(action) {
+            if (currentUser.role !== 'admin') {
+                showPermissionMessage();
+                return false;
+            }
+            return true;
+        }
+
+        function showPermissionMessage() {
+            document.getElementById('overlayBackdrop').classList.add('show');
+            document.getElementById('permissionMessage').classList.add('show');
+        }
+
+        function closePermissionMessage() {
+            document.getElementById('overlayBackdrop').classList.remove('show');
+            document.getElementById('permissionMessage').classList.remove('show');
+        }
+
+        // Zoom functions
+        function zoomIn() {
+            if (zoomLevel < 150) {
+                zoomLevel += 10;
+                updateZoom();
+            }
+        }
+
+        function zoomOut() {
+            if (zoomLevel > 50) {
+                zoomLevel -= 10;
+                updateZoom();
+            }
+        }
+
+        function updateZoom() {
+            const layout = document.getElementById('warehouseLayout');
+            layout.style.transform = `scale(${zoomLevel / 100})`;
+            document.getElementById('zoomLevel').textContent = zoomLevel + '%';
+        }
+
+        // Generate unique 10-digit transaction number
+        function generateTransactionNumber() {
+            let txn;
+            let isUnique = false;
+            
+            // Keep generating until we get a unique number
+            while (!isUnique) {
+                // Generate a random 10-digit number
+                // Format: 1000000000 to 9999999999
+                const min = 1000000000; // 10-digit minimum
+                const max = 9999999999; // 10-digit maximum
+                txn = Math.floor(Math.random() * (max - min + 1)) + min;
+                
+                // Check if this transaction number already exists
+                isUnique = true;
+                Object.keys(inventory).forEach(locationId => {
+                    inventory[locationId].forEach(item => {
+                        if (item.transactionNumber === txn.toString()) {
+                            isUnique = false;
+                        }
+                    });
+                });
+            }
+            
+            return txn.toString();
+        }
+
+        // Add item(s)
+        document.getElementById('itemForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const palletCount = parseInt(document.getElementById('palletCount').value) || 1;
+            const location = document.getElementById('location').value;
+            const baseTime = Date.now();
+            
+            // Create multiple items (pallets)
+            for (let i = 0; i < palletCount; i++) {
+                const item = {
+                    id: baseTime + i + Math.random(),
+                    partNumber: document.getElementById('partNumber').value,
+                    partDescription: document.getElementById('partDescription').value,
+                    amount: parseInt(document.getElementById('amount').value),
+                    date: document.getElementById('date').value,
+                    operatorNumber: document.getElementById('operatorNumber').value,
+                    partCost: parseFloat(document.getElementById('partCost').value),
+                    partType: document.getElementById('partType').value,
+                    location: location,
+                    transactionNumber: generateTransactionNumber(),
+                    palletNumber: palletCount > 1 ? (i + 1) : null,
+                    createdBy: currentUser ? currentUser.username : 'Unknown',
+                    createdByName: currentUser ? currentUser.displayName : 'Unknown',
+                    lastModifiedBy: currentUser ? currentUser.username : 'Unknown',
+                    lastModifiedByName: currentUser ? currentUser.displayName : 'Unknown',
+                    lastModifiedDate: document.getElementById('date').value
+                };
+
+                inventory[location].push(item);
+            }
+            
+            saveToLocalStorage();
+            renderLocation(location);
+            
+            // Generate and display labels for all items
+            const lastItems = inventory[location].slice(-palletCount);
+            generateLabels(lastItems);
+            
+            this.reset();
+            document.getElementById('date').valueAsDate = new Date();
+            document.getElementById('palletCount').value = '1';
+            
+            // Show success message
+            if (palletCount > 1) {
+                alert(`✅ Successfully added ${palletCount} pallets to ${locationNames[location]}`);
+            }
+        });
+
+        // Generate printable labels
+        function generateLabels(items) {
+            const locationNames = {
+                'mrb': 'MRB',
+                'shipped': 'Shipped',
+                'manufacturing-floor': 'Manufacturing',
+                'warehouse-1': 'Warehouse 1',
+                'warehouse-2': 'Warehouse 2',
+                'warehouse-3': 'Warehouse 3',
+                'warehouse-4': 'Warehouse 4'
+            };
+            
+            const typeNames = {
+                'raw-material': 'Raw Material',
+                'wip': 'WIP',
+                'finished-good': 'Finished Good'
+            };
+            
+            // Create print window HTML
+            let htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Item Labels - Print File</title>
+    <style>
+        @page {
+            size: 4in 6in;
+            margin: 0;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: white;
+        }
+        
+        .print-header {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 3px solid #333;
+            background: #f5f5f5;
+        }
+        
+        .print-header h1 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 24px;
+        }
+        
+        .print-date {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .labels-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+        
+        .label {
+            width: 4in;
+            height: 6in;
+            border: 2px solid #000;
+            padding: 0.25in;
+            box-sizing: border-box;
+            page-break-after: always;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .label-header {
+            border-bottom: 4px solid #000;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .part-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #000;
+            margin: 0 0 10px 0;
+            letter-spacing: 2px;
+        }
+        
+        .description {
+            font-size: 24px;
+            color: #000;
+            margin: 0;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+        
+        .label-info {
+            font-size: 20px;
+            line-height: 2;
+            flex-grow: 1;
+        }
+        
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .label-row:last-child {
+            border-bottom: none;
+        }
+        
+        .label-field {
+            font-weight: bold;
+            color: #000;
+        }
+        
+        .label-value {
+            color: #333;
+            font-weight: normal;
+        }
+        
+        .label-footer {
+            border-top: 4px solid #000;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+        
+        .barcode-section {
+            text-align: center;
+            background: #f9f9f9;
+            padding: 15px;
+            border: 2px solid #000;
+            border-radius: 8px;
+        }
+        
+        .transaction-number {
+            font-family: 'Courier New', monospace;
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            margin: 10px 0;
+        }
+        
+        .barcode-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .type-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+        }
+        
+        .type-raw-material { background: #e74c3c; }
+        .type-wip { background: #f39c12; }
+        .type-finished-good { background: #27ae60; }
+        
+        .label-counter {
+            font-size: 16px;
+            color: #666;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .print-header {
+                display: none !important;
+            }
+            
+            .label {
+                border: none;
+                page-break-after: always;
+                margin: 0;
+                width: 4in;
+                height: 6in;
+            }
+            
+            .label:last-child {
+                page-break-after: auto;
+            }
+        }
+        
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+        
+        .print-button:hover {
+            background: #229954;
+            transform: scale(1.05);
+        }
+        
+        .close-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+        
+        .close-button:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <button class="close-button no-print" onclick="window.close()">✖ Close</button>
+    <button class="print-button no-print" onclick="window.print()">🖨️ Print Labels</button>
+    
+    <div class="print-header">
+        <h1>📦 Inventory Item Labels</h1>
+        <div class="print-date">Generated: ${new Date().toLocaleString()}</div>
+        <div class="print-date">Total Items: ${items.length} | Labels per Item: 4</div>
+    </div>
+    
+    <div class="labels-container">
+`;
+            
+            // Generate 4 labels for each item
+            items.forEach(item => {
+                const locationName = locationNames[item.location] || item.location;
+                const typeName = typeNames[item.partType] || item.partType;
+                const typeClass = `type-${item.partType}`;
+                const palletInfo = item.palletNumber ? ` [Pallet ${item.palletNumber}]` : '';
+                
+                for (let i = 1; i <= 4; i++) {
+                    htmlContent += `
+        <div class="label">
+            <div class="label-header">
+                <div class="part-number">${item.partNumber}${palletInfo}</div>
+                <div class="description">${item.partDescription}</div>
+            </div>
+            
+            <div class="label-info">
+                <div class="label-row">
+                    <span class="label-field">QUANTITY:</span>
+                    <span class="label-value">${item.amount} units</span>
+                </div>
+                <div class="label-row">
+                    <span class="label-field">COST:</span>
+                    <span class="label-value">$${item.partCost.toFixed(2)}</span>
+                </div>
+                <div class="label-row">
+                    <span class="label-field">DATE:</span>
+                    <span class="label-value">${item.date}</span>
+                </div>
+                <div class="label-row">
+                    <span class="label-field">OPERATOR:</span>
+                    <span class="label-value">${item.operatorNumber}</span>
+                </div>
+                <div class="label-row">
+                    <span class="label-field">TRANSACTION #:</span>
+                    <span class="label-value" style="font-family: 'Courier New', monospace; font-weight: bold; letter-spacing: 2px;">${item.transactionNumber}</span>
+                </div>
+                <div class="label-row">
+                    <span class="label-field">TYPE:</span>
+                    <span class="type-badge ${typeClass}">${typeName}</span>
+                </div>
+            </div>
+            
+            <div class="label-footer">
+                <div class="barcode-section">
+                    <div class="label-counter">Label ${i} of 4</div>
+                </div>
+            </div>
+        </div>
+`;
+                }
+            });
+            
+            htmlContent += `
+    </div>
+</body>
+</html>
+`;
+            
+            // Open in new window
+            const printWindow = window.open('', '_blank', 'width=1000,height=800');
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+            
+            console.log(`✅ Generated ${items.length * 4} labels for ${items.length} items`);
+        }
+        
+        // Render location
+        function renderLocation(locationId) {
+            const container = document.getElementById(`${locationId}-items`);
+            const summary = document.getElementById(`${locationId}-summary`);
+            
+            if (!container) return;
+            
+            container.innerHTML = '';
+
+            let costs = {
+                'raw-material': 0,
+                'wip': 0,
+                'finished-good': 0,
+                'total': 0
+            };
+
+            let quantities = {
+                'raw-material': 0,
+                'wip': 0,
+                'finished-good': 0,
+                'total': 0
+            };
+
+            inventory[locationId].forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `inventory-item ${item.partType}`;
+                itemDiv.draggable = true;
+                itemDiv.dataset.itemId = item.id;
+                itemDiv.dataset.location = locationId;
+
+                const palletBadge = item.palletNumber ? `<span class="pallet-badge">P${item.palletNumber}</span>` : '';
+                
+                itemDiv.innerHTML = `
+                    <div class="item-header">
+                        <span class="item-part-number">${item.partNumber}${palletBadge}</span>
+                        <button class="delete-btn" onclick="deleteItem('${locationId}', ${item.id})">×</button>
+                    </div>
+                    <div class="item-details">
+                        <div>${item.partDescription}</div>
+                        <div>Qty: ${item.amount} | $${item.partCost.toFixed(2)}</div>
+                        <div style="font-family: monospace; font-size: 0.85em; color: #495057; margin-top: 3px;"><strong>TXN:</strong> ${item.transactionNumber}</div>
+                    </div>
+                `;
+
+                itemDiv.addEventListener('dragstart', handleDragStart);
+                itemDiv.addEventListener('dragend', handleDragEnd);
+
+                container.appendChild(itemDiv);
+
+                // Calculate totals
+                costs[item.partType] += item.partCost * item.amount;
+                costs.total += item.partCost * item.amount;
+                quantities[item.partType] += item.amount;
+                quantities.total += item.amount;
+            });
+
+            // Update summary
+            if (summary) {
+                summary.innerHTML = `
+                    <div class="summary-title">📊 Summary</div>
+                    <div class="summary-line raw">
+                        <span>🔴 Raw:</span>
+                        <span>$${costs['raw-material'].toFixed(2)} (${quantities['raw-material']})</span>
+                    </div>
+                    <div class="summary-line wip">
+                        <span>🟡 WIP:</span>
+                        <span>$${costs['wip'].toFixed(2)} (${quantities['wip']})</span>
+                    </div>
+                    <div class="summary-line finished">
+                        <span>🟢 Finished:</span>
+                        <span>$${costs['finished-good'].toFixed(2)} (${quantities['finished-good']})</span>
+                    </div>
+                    <div class="summary-line total">
+                        <span>💰 Total:</span>
+                        <span>$${costs.total.toFixed(2)} (${quantities.total})</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Delete item
+        function deleteItem(locationId, itemId) {
+            if (!checkPermission('delete')) return;
+
+            if (confirm('Delete this item?')) {
+                inventory[locationId] = inventory[locationId].filter(item => item.id !== itemId);
+                saveToLocalStorage();
+                renderLocation(locationId);
+            }
+        }
+
+        // Drag and drop
+        let draggedItem = null;
+        let sourceLocation = null;
+
+        function handleDragStart(e) {
+            console.log('🎯 Drag started');
+            draggedItem = this;
+            sourceLocation = this.dataset.location;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            
+            // Show mini locations if any location is maximized
+            const maximizedBox = document.querySelector('.location-box.maximized');
+            if (maximizedBox) {
+                document.getElementById('miniLocations').classList.add('active');
+            }
+        }
+
+        function handleDragEnd(e) {
+            console.log('🎯 Drag ended');
+            this.classList.remove('dragging');
+            document.querySelectorAll('.location-box').forEach(box => {
+                box.classList.remove('drag-over');
+            });
+            document.querySelectorAll('.mini-location').forEach(mini => {
+                mini.classList.remove('drag-over');
+            });
+            
+            // Hide mini locations
+            document.getElementById('miniLocations').classList.remove('active');
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const box = this.closest('.location-box');
+            if (box) box.classList.add('drag-over');
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            const box = this.closest('.location-box');
+            if (box && e.target === this) {
+                box.classList.remove('drag-over');
+            }
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) e.stopPropagation();
+            if (e.preventDefault) e.preventDefault();
+
+            const box = this.closest('.location-box');
+            const targetLocation = box.id.replace('-box', '');
+            const itemId = parseFloat(draggedItem.dataset.itemId);
+
+            console.log(`📦 Moving item ${itemId} from ${sourceLocation} to ${targetLocation}`);
+
+            const itemIndex = inventory[sourceLocation].findIndex(item => item.id === itemId);
+            if (itemIndex !== -1) {
+                const item = inventory[sourceLocation][itemIndex];
+                inventory[sourceLocation].splice(itemIndex, 1);
+                item.location = targetLocation;
+                item.lastModifiedBy = currentUser ? currentUser.username : 'Unknown';
+                item.lastModifiedByName = currentUser ? currentUser.displayName : 'Unknown';
+                item.lastModifiedDate = new Date().toISOString().split('T')[0];
+                inventory[targetLocation].push(item);
+
+                saveToLocalStorage();
+                renderLocation(sourceLocation);
+                renderLocation(targetLocation);
+                
+                console.log(`✅ Item moved successfully to ${targetLocation}`);
+            }
+
+            document.querySelectorAll('.location-box').forEach(b => {
+                b.classList.remove('drag-over');
+            });
+
+            return false;
+        }
+
+        // Setup drag and drop zones
+        function setupDragDropZones() {
+            const allLocations = ['mrb', 'shipped', 'manufacturing-floor', 'warehouse-1', 'warehouse-2', 'warehouse-3', 'warehouse-4'];
+            
+            // Setup main location drop zones
+            allLocations.forEach(locationId => {
+                const itemsArea = document.getElementById(`${locationId}-items`);
+                if (itemsArea) {
+                    itemsArea.addEventListener('dragover', handleDragOver);
+                    itemsArea.addEventListener('drop', handleDrop);
+                    itemsArea.addEventListener('dragleave', handleDragLeave);
+                }
+            });
+            
+            // Setup mini location drop zones
+            allLocations.forEach(locationId => {
+                const miniLocation = document.querySelector(`.mini-location[data-location="${locationId}"]`);
+                if (miniLocation) {
+                    miniLocation.addEventListener('dragover', handleMiniDragOver);
+                    miniLocation.addEventListener('drop', handleMiniDrop);
+                    miniLocation.addEventListener('dragleave', handleMiniDragLeave);
+                }
+            });
+            
+            console.log('✅ Drag & drop zones setup complete for all 8 locations + mini locations');
+        }
+        
+        // Mini location drag handlers
+        function handleMiniDragOver(e) {
+            if (e.preventDefault) e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            this.classList.add('drag-over');
+            return false;
+        }
+        
+        function handleMiniDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+        
+        function handleMiniDrop(e) {
+            if (e.stopPropagation) e.stopPropagation();
+            if (e.preventDefault) e.preventDefault();
+            
+            const targetLocation = this.dataset.location;
+            const itemId = parseFloat(draggedItem.dataset.itemId);
+            
+            console.log(`📦 Mini drop: Moving item ${itemId} from ${sourceLocation} to ${targetLocation}`);
+            
+            const itemIndex = inventory[sourceLocation].findIndex(item => item.id === itemId);
+            if (itemIndex !== -1) {
+                const item = inventory[sourceLocation][itemIndex];
+                inventory[sourceLocation].splice(itemIndex, 1);
+                item.location = targetLocation;
+                item.lastModifiedBy = currentUser ? currentUser.username : 'Unknown';
+                item.lastModifiedByName = currentUser ? currentUser.displayName : 'Unknown';
+                item.lastModifiedDate = new Date().toISOString().split('T')[0];
+                inventory[targetLocation].push(item);
+                
+                saveToLocalStorage();
+                renderLocation(sourceLocation);
+                renderLocation(targetLocation);
+                
+                // Show success message
+                showMoveSuccess(item, targetLocation);
+                
+                console.log(`✅ Item moved successfully via mini location to ${targetLocation}`);
+            }
+            
+            this.classList.remove('drag-over');
+            return false;
+        }
+        
+        // Show success message for mini location drops
+        function showMoveSuccess(item, location) {
+            const locationNames = {
+                'mrb': 'MRB',
+                'shipped': 'Shipped',
+                'manufacturing-floor': 'Manufacturing',
+                'warehouse-1': 'Warehouse 1',
+                'warehouse-2': 'Warehouse 2',
+                'warehouse-3': 'Warehouse 3',
+                'warehouse-4': 'Warehouse 4'
+            };
+            
+            // Create floating success message
+            const message = document.createElement('div');
+            message.style.cssText = `
+                position: fixed;
+                top: 150px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+                color: white;
+                padding: 15px 30px;
+                border-radius: 10px;
+                box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+                z-index: 10002;
+                font-weight: 600;
+                font-size: 1.1em;
+                animation: slideDown 0.3s ease-out;
+            `;
+            message.innerHTML = `✅ ${item.partNumber} moved to ${locationNames[location]}`;
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.style.opacity = '0';
+                message.style.transition = 'opacity 0.5s';
+                setTimeout(() => message.remove(), 500);
+            }, 2000);
+        }
+
+        // Local storage
+        function saveToLocalStorage() {
+            localStorage.setItem('warehouseInventory', JSON.stringify(inventory));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('warehouseInventory');
+            if (saved) {
+                inventory = JSON.parse(saved);
+            }
+        }
+
+        // Add sample data
+        function addSampleData() {
+            let isEmpty = true;
+            Object.keys(inventory).forEach(loc => {
+                if (inventory[loc].length > 0) isEmpty = false;
+            });
+            if (!isEmpty) return;
+
+            const today = new Date();
+            const samples = [
+                {
+                    id: Date.now() + 1,
+                    partNumber: 'P-1001',
+                    partDescription: 'Steel Rod',
+                    amount: 150,
+                    date: today.toISOString().split('T')[0],
+                    operatorNumber: 'OP-101',
+                    partCost: 25.50,
+                    partType: 'raw-material',
+                    location: 'warehouse-1',
+                    transactionNumber: generateTransactionNumber()
+                },
+                {
+                    id: Date.now() + 2,
+                    partNumber: 'P-2045',
+                    partDescription: 'Motor Housing',
+                    amount: 75,
+                    date: today.toISOString().split('T')[0],
+                    operatorNumber: 'OP-102',
+                    partCost: 145.00,
+                    partType: 'wip',
+                    location: 'manufacturing-floor',
+                    transactionNumber: generateTransactionNumber()
+                },
+                {
+                    id: Date.now() + 3,
+                    partNumber: 'P-3089',
+                    partDescription: 'Finished Product',
+                    amount: 50,
+                    date: today.toISOString().split('T')[0],
+                    operatorNumber: 'OP-103',
+                    partCost: 350.00,
+                    partType: 'finished-good',
+                    location: 'warehouse-2',
+                    transactionNumber: generateTransactionNumber()
+                },
+
+            ];
+
+            samples.forEach(item => {
+                inventory[item.location].push(item);
+            });
+
+            saveToLocalStorage();
+        }
+
+        // Initialize
+        function initInventory() {
+            loadFromLocalStorage();
+            addSampleData();
+            setupDragDropZones();
+            Object.keys(inventory).forEach(location => renderLocation(location));
+            document.getElementById('date').valueAsDate = new Date();
+        }
+
+        // Check for saved session
+        window.addEventListener('load', function() {
+            const savedUser = sessionStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('mainContainer').style.display = 'block';
+                updateUIForRole();
+                initInventory();
+            }
+        });
+
+        // Toggle auto-fit
+        function toggleAutoFit() {
+            autoFitEnabled = !autoFitEnabled;
+            const btn = document.getElementById('autoFitBtn');
+            const allLocations = ['mrb', 'shipped', 'manufacturing-floor', 'warehouse-1', 'warehouse-2', 'warehouse-3', 'warehouse-4'];
+            
+            if (autoFitEnabled) {
+                btn.textContent = '📐 Auto-Fit: ON';
+                btn.classList.remove('off');
+                
+                // Apply auto-fit to all locations
+                allLocations.forEach(locationId => {
+                    const itemsArea = document.getElementById(`${locationId}-items`);
+                    const box = document.getElementById(`${locationId}-box`);
+                    if (itemsArea) {
+                        itemsArea.classList.add('auto-fit');
+                    }
+                    if (box) {
+                        box.classList.add('auto-fit');
+                    }
+                });
+            } else {
+                btn.textContent = '📐 Auto-Fit: OFF';
+                btn.classList.add('off');
+                
+                // Remove auto-fit from all locations
+                allLocations.forEach(locationId => {
+                    const itemsArea = document.getElementById(`${locationId}-items`);
+                    const box = document.getElementById(`${locationId}-box`);
+                    if (itemsArea) {
+                        itemsArea.classList.remove('auto-fit');
+                    }
+                    if (box) {
+                        box.classList.remove('auto-fit');
+                    }
+                });
+            }
+        }
+        
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'history') {
+                updateHistoryTab();
+            }
+        }
+        
+        // Update History Tab
+        function updateHistoryTab() {
+            updateStats();
+            updateTransactionLog();
+            updateCharts();
+        }
+        
+        // Update statistics
+        function updateStats() {
+            let totalItems = 0;
+            let totalPallets = 0;
+            let totalValue = 0;
+            let totalUnits = 0;
+            
+            Object.keys(inventory).forEach(locationId => {
+                inventory[locationId].forEach(item => {
+                    totalItems++;
+                    if (item.palletNumber) totalPallets++;
+                    totalValue += (item.partCost * item.amount);
+                    totalUnits += item.amount;
+                });
+            });
+            
+            document.getElementById('totalTransactions').textContent = totalItems;
+            document.getElementById('totalPallets').textContent = totalPallets;
+            document.getElementById('totalValue').textContent = '$' + totalValue.toFixed(2);
+            document.getElementById('totalUnits').textContent = totalUnits;
+        }
+        
+        // Update transaction log
+        function updateTransactionLog() {
+            const tbody = document.getElementById('transactionTableBody');
+            tbody.innerHTML = '';
+            
+            let allTransactions = [];
+            Object.keys(inventory).forEach(locationId => {
+                inventory[locationId].forEach(item => {
+                    allTransactions.push({...item, location: locationId});
+                });
+            });
+            
+            // Sort chronologically: earliest to most recent (oldest first)
+            allTransactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            allTransactions.forEach(item => {
+                const row = document.createElement('tr');
+                const totalValue = (item.partCost * item.amount).toFixed(2);
+                const palletInfo = item.palletNumber ? `P${item.palletNumber}` : '-';
+                
+                const userDisplay = item.lastModifiedByName || item.createdByName || 'Unknown';
+                row.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${item.partNumber}</td>
+                    <td>${item.partDescription}</td>
+                    <td><span style="padding: 3px 8px; border-radius: 3px; font-size: 0.85em; font-weight: bold; background: ${item.partType === 'raw-material' ? '#ff6b6b' : item.partType === 'wip' ? '#ffd93d' : '#51cf66'}; color: ${item.partType === 'wip' ? '#333' : 'white'};">${typeLabels[item.partType]}</span></td>
+                    <td>${palletInfo}</td>
+                    <td>${item.amount}</td>
+                    <td>$${item.partCost.toFixed(2)}</td>
+                    <td><strong>$${totalValue}</strong></td>
+                    <td>${item.operatorNumber}</td>
+                    <td>${locationNames[item.location]}</td>
+                    <td><strong>${userDisplay}</strong></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Update charts
+        function updateCharts() {
+            const period = document.getElementById('chartPeriod').value;
+            const data = aggregateDataByPeriod(period);
+            
+            if (valueChart) valueChart.destroy();
+            if (unitsChart) unitsChart.destroy();
+            if (pieChart) pieChart.destroy();
+            
+            // Value Chart
+            const valueCtx = document.getElementById('valueChart').getContext('2d');
+            valueChart = new Chart(valueCtx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [
+                        {
+                            label: 'Raw Material',
+                            data: data.rawMaterialValue,
+                            borderColor: '#ff6b6b',
+                            backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'WIP',
+                            data: data.wipValue,
+                            borderColor: '#ffd93d',
+                            backgroundColor: 'rgba(255, 217, 61, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Finished Goods',
+                            data: data.finishedValue,
+                            borderColor: '#51cf66',
+                            backgroundColor: 'rgba(81, 207, 102, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: value => '$' + value.toFixed(0) }
+                        }
+                    }
+                }
+            });
+            
+            // Units Chart
+            const unitsCtx = document.getElementById('unitsChart').getContext('2d');
+            unitsChart = new Chart(unitsCtx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [
+                        { label: 'Raw Material', data: data.rawMaterialUnits, backgroundColor: '#ff6b6b' },
+                        { label: 'WIP', data: data.wipUnits, backgroundColor: '#ffd93d' },
+                        { label: 'Finished Goods', data: data.finishedUnits, backgroundColor: '#51cf66' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true, beginAtZero: true }
+                    }
+                }
+            });
+            
+            // Pie Chart
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            pieChart = new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Raw Material', 'WIP', 'Finished Goods'],
+                    datasets: [{
+                        data: [data.totalRawMaterial, data.totalWIP, data.totalFinished],
+                        backgroundColor: ['#ff6b6b', '#ffd93d', '#51cf66']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+        
+        // Aggregate data by period
+        function aggregateDataByPeriod(period) {
+            const now = new Date();
+            let labels = [];
+            let rawMaterialValue = [], wipValue = [], finishedValue = [];
+            let rawMaterialUnits = [], wipUnits = [], finishedUnits = [];
+            
+            if (period === 'daily') {
+                for (let i = 6; i >= 0; i--) {
+                    const date = new Date(now);
+                    date.setDate(date.getDate() - i);
+                    labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                    const dayData = getDataForDate(date);
+                    rawMaterialValue.push(dayData.rawMaterialValue);
+                    wipValue.push(dayData.wipValue);
+                    finishedValue.push(dayData.finishedValue);
+                    rawMaterialUnits.push(dayData.rawMaterialUnits);
+                    wipUnits.push(dayData.wipUnits);
+                    finishedUnits.push(dayData.finishedUnits);
+                }
+            } else if (period === 'weekly') {
+                for (let i = 7; i >= 0; i--) {
+                    labels.push('Week ' + (8 - i));
+                    const weekStart = new Date(now);
+                    weekStart.setDate(weekStart.getDate() - (i * 7));
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekEnd.getDate() + 6);
+                    const weekData = getDataForWeek(weekStart, weekEnd);
+                    rawMaterialValue.push(weekData.rawMaterialValue);
+                    wipValue.push(weekData.wipValue);
+                    finishedValue.push(weekData.finishedValue);
+                    rawMaterialUnits.push(weekData.rawMaterialUnits);
+                    wipUnits.push(weekData.wipUnits);
+                    finishedUnits.push(weekData.finishedUnits);
+                }
+            } else if (period === 'monthly') {
+                for (let i = 11; i >= 0; i--) {
+                    const month = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    labels.push(month.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }));
+                    const monthData = getDataForMonth(month);
+                    rawMaterialValue.push(monthData.rawMaterialValue);
+                    wipValue.push(monthData.wipValue);
+                    finishedValue.push(monthData.finishedValue);
+                    rawMaterialUnits.push(monthData.rawMaterialUnits);
+                    wipUnits.push(monthData.wipUnits);
+                    finishedUnits.push(monthData.finishedUnits);
+                }
+            }
+            
+            let totalRawMaterial = 0, totalWIP = 0, totalFinished = 0;
+            Object.keys(inventory).forEach(locationId => {
+                inventory[locationId].forEach(item => {
+                    const value = item.partCost * item.amount;
+                    if (item.partType === 'raw-material') totalRawMaterial += value;
+                    else if (item.partType === 'wip') totalWIP += value;
+                    else if (item.partType === 'finished-good') totalFinished += value;
+                });
+            });
+            
+            return { labels, rawMaterialValue, wipValue, finishedValue, rawMaterialUnits, wipUnits, finishedUnits, totalRawMaterial, totalWIP, totalFinished };
+        }
+        
+        function getDataForDate(targetDate) {
+            const dateStr = targetDate.toISOString().split('T')[0];
+            let data = { rawMaterialValue: 0, wipValue: 0, finishedValue: 0, rawMaterialUnits: 0, wipUnits: 0, finishedUnits: 0 };
+            Object.keys(inventory).forEach(locationId => {
+                inventory[locationId].forEach(item => {
+                    if (item.date === dateStr) {
+                        const value = item.partCost * item.amount;
+                        if (item.partType === 'raw-material') { data.rawMaterialValue += value; data.rawMaterialUnits += item.amount; }
+                        else if (item.partType === 'wip') { data.wipValue += value; data.wipUnits += item.amount; }
+                        else if (item.partType === 'finished-good') { data.finishedValue += value; data.finishedUnits += item.amount; }
+                    }
+                });
+            });
+            return data;
+        }
+        
+        function getDataForWeek(startDate, endDate) {
+            let data = { rawMaterialValue: 0, wipValue: 0, finishedValue: 0, rawMaterialUnits: 0, wipUnits: 0, finishedUnits: 0 };
+            Object.keys(inventory).forEach(locationId => {
+                inventory[locationId].forEach(item => {
+                    const itemDate = new Date(item.date);
+                    if (itemDate >= startDate && itemDate <= endDate) {
+                        const value = item.partCost * item.amount;
+                        if (item.partType === 'raw-material') { data.rawMaterialValue += value; data.rawMaterialUnits += item.amount; }
+                        else if (item.partType === 'wip') { data.wipValue += value; data.wipUnits += item.amount; }
+                        else if (item.partType === 'finished-good') { data.finishedValue += value; data.finishedUnits += item.amount; }
+                    }
+                });
+            });
+            return data;
+        }
+        
+        function getDataForMonth(targetMonth) {
+            let data = { rawMaterialValue: 0, wipValue: 0, finishedValue: 0, rawMaterialUnits: 0, wipUnits: 0, finishedUnits: 0 };
+            const monthStart = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
+            const monthEnd = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0);
+            Object.keys(inventory).forEach(locationId => {
+                inventory[locationId].forEach(item => {
+                    const itemDate = new Date(item.date);
+                    if (itemDate >= monthStart && itemDate <= monthEnd) {
+                        const value = item.partCost * item.amount;
+                        if (item.partType === 'raw-material') { data.rawMaterialValue += value; data.rawMaterialUnits += item.amount; }
+                        else if (item.partType === 'wip') { data.wipValue += value; data.wipUnits += item.amount; }
+                        else if (item.partType === 'finished-good') { data.finishedValue += value; data.finishedUnits += item.amount; }
+                    }
+                });
+            });
+            return data;
+        }
+        
+        // Search functionality
+        function searchParts() {
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            const resultsDiv = document.getElementById('searchResults');
+            
+            if (!searchTerm) {
+                resultsDiv.innerHTML = '<span style="color: #d32f2f;">⚠️ Please enter a part number or transaction number to search. The search will find matches in BOTH fields!</span>';
+                return;
+            }
+            
+            // Show searching indicator
+            resultsDiv.innerHTML = '<span style="color: #2196f3;">🔄 Searching for "' + searchTerm + '" in part numbers and transaction numbers...</span>';
+            
+            // Clear previous highlights
+            document.querySelectorAll('.inventory-item.highlight').forEach(item => {
+                item.classList.remove('highlight');
+            });
+            
+            // Search through all locations
+            let foundItems = [];
+            let totalUnits = 0;
+            let totalCost = 0;
+            
+            Object.keys(inventory).forEach(locationId => {
+                inventory[locationId].forEach(item => {
+                    // Ensure transaction number exists
+                    if (!item.transactionNumber) {
+                        item.transactionNumber = generateTransactionNumber();
+                    }
+                    
+                    // Search both part number and transaction number
+                    if (item.partNumber.toLowerCase().includes(searchTerm) || 
+                        (item.transactionNumber && item.transactionNumber.toLowerCase().includes(searchTerm))) {
+                        foundItems.push({
+                            item: item,
+                            location: locationId
+                        });
+                        
+                        // Calculate totals
+                        totalUnits += item.amount;
+                        totalCost += (item.partCost * item.amount);
+                        
+                        // Highlight the item with blinking animation
+                        setTimeout(() => {
+                            const itemElements = document.querySelectorAll(`[data-item-id="${item.id}"]`);
+                            itemElements.forEach(itemElement => {
+                                if (itemElement) {
+                                    itemElement.classList.add('highlight');
+                                    // Scroll to first found item
+                                    if (foundItems.length === 1) {
+                                        itemElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    }
+                                }
+                            });
+                        }, 100);
+                    }
+                });
+            });
+            
+            // Display results
+            if (foundItems.length > 0) {
+                let resultText = `<div class="search-results-header">✅ Found ${foundItems.length} item(s) matching "${searchTerm}" (searched in part numbers & transaction numbers - watch for blinking items!)</div>`;
+                
+                foundItems.forEach((found, index) => {
+                    const itemTotalCost = found.item.partCost * found.item.amount;
+                    const palletInfo = found.item.palletNumber ? ` [P${found.item.palletNumber}]` : '';
+                    resultText += `
+                        <div class="search-result-item">
+                            <div class="search-result-info">
+                                <strong>${index + 1}. ${found.item.partNumber}${palletInfo}</strong> - ${found.item.partDescription}<br>
+                                <small>📍 ${locationNames[found.location]} | 🏷️ ${typeLabels[found.item.partType]} | TXN: ${found.item.transactionNumber}</small>
+                            </div>
+                            <div class="search-result-stats">
+                                <div>📦 ${found.item.amount} units</div>
+                                <div style="color: #2e7d32;">$${itemTotalCost.toFixed(2)}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                // Add summary
+                resultText += `
+                    <div class="search-summary">
+                        <div class="summary-row">
+                            <span>Total Items Found:</span>
+                            <span>${foundItems.length}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Total Units:</span>
+                            <span>📦 ${totalUnits}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Total Value:</span>
+                            <span>💰 $${totalCost.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+                
+                resultsDiv.innerHTML = resultText;
+            } else {
+                resultsDiv.innerHTML = `<span style="color: #d32f2f;">❌ No items found matching "${searchTerm}" in part numbers or transaction numbers</span>`;
+            }
+        }
+        
+        // Clear search
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResults').innerHTML = '';
+            
+            // Remove all highlights
+            document.querySelectorAll('.inventory-item.highlight').forEach(item => {
+                item.classList.remove('highlight');
+            });
+        }
+        
+        // Add enter key support for search
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        searchParts();
+                    }
+                });
+            }
+        });
+        
+        // Manual move item function
+        function manualMoveItem() {
+            const txnNumber = document.getElementById('moveTransactionNumber').value.trim();
+            const targetLocation = document.getElementById('moveToLocation').value;
+            const resultDiv = document.getElementById('moveResult');
+            
+            // Validate inputs
+            if (!txnNumber) {
+                resultDiv.className = 'move-result error';
+                resultDiv.textContent = '❌ Please enter a transaction number';
+                return;
+            }
+            
+            if (!targetLocation) {
+                resultDiv.className = 'move-result error';
+                resultDiv.textContent = '❌ Please select a destination location';
+                return;
+            }
+            
+            // Search for item with matching transaction number
+            let foundItem = null;
+            let sourceLocation = null;
+            
+            Object.keys(inventory).forEach(locationId => {
+                inventory[locationId].forEach(item => {
+                    if (item.transactionNumber === txnNumber) {
+                        foundItem = item;
+                        sourceLocation = locationId;
+                    }
+                });
+            });
+            
+            // Check if item was found
+            if (!foundItem) {
+                resultDiv.className = 'move-result error';
+                resultDiv.textContent = `❌ No item found with transaction number: ${txnNumber}`;
+                return;
+            }
+            
+            // Check if already in target location
+            if (sourceLocation === targetLocation) {
+                resultDiv.className = 'move-result error';
+                resultDiv.textContent = `⚠️ Item is already in ${locationNames[targetLocation]}`;
+                return;
+            }
+            
+            // Move the item
+            const itemIndex = inventory[sourceLocation].findIndex(item => item.transactionNumber === txnNumber);
+            if (itemIndex !== -1) {
+                // Remove from source
+                const movedItem = inventory[sourceLocation].splice(itemIndex, 1)[0];
+                
+                // Update location and add to target
+                movedItem.location = targetLocation;
+                movedItem.lastModifiedBy = currentUser ? currentUser.username : 'Unknown';
+                movedItem.lastModifiedByName = currentUser ? currentUser.displayName : 'Unknown';
+                movedItem.lastModifiedDate = new Date().toISOString().split('T')[0];
+                inventory[targetLocation].push(movedItem);
+                
+                // Save and re-render
+                saveToLocalStorage();
+                renderLocation(sourceLocation);
+                renderLocation(targetLocation);
+                
+                // Show success message
+                const palletInfo = movedItem.palletNumber ? ` [P${movedItem.palletNumber}]` : '';
+                resultDiv.className = 'move-result success';
+                resultDiv.innerHTML = `
+                    ✅ <strong>Successfully moved!</strong><br>
+                    <strong>${movedItem.partNumber}${palletInfo}</strong> - ${movedItem.partDescription}<br>
+                    From: <strong>${locationNames[sourceLocation]}</strong> → To: <strong>${locationNames[targetLocation]}</strong>
+                `;
+                
+                // Highlight the moved item in new location
+                setTimeout(() => {
+                    const itemElement = document.querySelector(`[data-item-id="${movedItem.id}"]`);
+                    if (itemElement) {
+                        itemElement.classList.add('highlight');
+                        itemElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        
+                        // Remove highlight after 5 seconds
+                        setTimeout(() => {
+                            itemElement.classList.remove('highlight');
+                        }, 5000);
+                    }
+                }, 200);
+                
+                // Clear form
+                document.getElementById('moveTransactionNumber').value = '';
+                document.getElementById('moveToLocation').value = '';
+                
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    resultDiv.className = 'move-result';
+                    resultDiv.textContent = '';
+                }, 5000);
+            }
+        }
+        
+        // Add enter key support for manual move
+        document.addEventListener('DOMContentLoaded', function() {
+            const moveInput = document.getElementById('moveTransactionNumber');
+            if (moveInput) {
+                moveInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        manualMoveItem();
+                    }
+                });
+            }
+        });
+        
+        // Toggle maximize location
+        let maximizedLocation = null;
+        
+        function closeMaximizedLocation() {
+            if (!maximizedLocation) return;
+            
+            const locationBox = document.getElementById(maximizedLocation);
+            const overlay = document.getElementById('maximizeOverlay');
+            const miniLocations = document.getElementById('miniLocations');
+            const closeBtn = document.getElementById('closeMaximized');
+            
+            if (locationBox) {
+                locationBox.classList.remove('maximized');
+                // Re-enable click-to-maximize
+                locationBox.style.cursor = 'pointer';
+            }
+            overlay.classList.remove('show');
+            miniLocations.classList.remove('show');
+            miniLocations.classList.remove('active');
+            closeBtn.classList.remove('show');
+            
+            // Reset close button text
+            closeBtn.innerHTML = '✖ Close';
+            
+            maximizedLocation = null;
+            
+            console.log('❌ Closed maximized view - Returned to all locations');
+        }
+        
+        function toggleMaximize(locationBoxId, event) {
+            // Don't maximize if clicking on interactive elements
+            if (event && (event.target.tagName === 'BUTTON' || 
+                event.target.closest('.inventory-item') || 
+                event.target.closest('.delete-btn'))) {
+                return;
+            }
+            
+            const locationBox = document.getElementById(locationBoxId);
+            const overlay = document.getElementById('maximizeOverlay');
+            const miniLocations = document.getElementById('miniLocations');
+            const closeBtn = document.getElementById('closeMaximized');
+            
+            if (maximizedLocation === locationBoxId) {
+                // Already maximized, restore to normal
+                closeMaximizedLocation();
+            } else {
+                // Restore any previously maximized location
+                if (maximizedLocation) {
+                    closeMaximizedLocation();
+                }
+                
+                // Maximize this location
+                locationBox.classList.add('maximized');
+                overlay.classList.add('show');
+                miniLocations.classList.add('show');
+                closeBtn.classList.add('show');
+                
+                // Update close button text with location name
+                const currentLocationId = locationBoxId.replace('-box', '');
+                const locationNames = {
+                    'mrb': 'MRB',
+                    'shipped': 'Shipped',
+                    'manufacturing-floor': 'Manufacturing',
+                    'warehouse-1': 'Warehouse 1',
+                    'warehouse-2': 'Warehouse 2',
+                    'warehouse-3': 'Warehouse 3',
+                    'warehouse-4': 'Warehouse 4'
+                };
+                const locationName = locationNames[currentLocationId] || currentLocationId;
+                closeBtn.innerHTML = `✖ Close ${locationName}`;
+                
+                // Update mini locations to show current
+                document.querySelectorAll('.mini-location').forEach(mini => {
+                    if (mini.dataset.location === currentLocationId) {
+                        mini.classList.add('active');
+                    } else {
+                        mini.classList.remove('active');
+                    }
+                });
+                
+                // Setup drag and drop for mini locations
+                setupMiniLocationDragDrop();
+                
+                // Disable click-to-maximize on location when maximized
+                locationBox.style.cursor = 'default';
+                
+                maximizedLocation = locationBoxId;
+                
+                console.log(`📖 Maximized: ${locationName}`);
+            }
+        }
+        
+        // Close maximize on overlay click
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('maximizeOverlay');
+            if (overlay) {
+                overlay.addEventListener('click', closeMaximizedLocation);
+            }
+        });
+        
+        // Close maximize on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && maximizedLocation) {
+                closeMaximizedLocation();
+            }
+        });
+        
+        // Setup drag and drop for mini locations
+        function setupMiniLocationDragDrop() {
+            document.querySelectorAll('.mini-location').forEach(mini => {
+                mini.addEventListener('dragover', handleMiniDragOver);
+                mini.addEventListener('drop', handleMiniDrop);
+                mini.addEventListener('dragleave', handleMiniDragLeave);
+            });
+        }
+        
+        function handleMiniDragOver(e) {
+            if (e.preventDefault) e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            this.classList.add('drag-over');
+            return false;
+        }
+        
+        function handleMiniDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+        
+        function handleMiniDrop(e) {
+            if (e.stopPropagation) e.stopPropagation();
+            if (e.preventDefault) e.preventDefault();
+            
+            this.classList.remove('drag-over');
+            
+            const targetLocation = this.dataset.location;
+            const itemId = parseFloat(draggedItem.dataset.itemId);
+            
+            // Find and move the item
+            const itemIndex = inventory[sourceLocation].findIndex(item => item.id === itemId);
+            if (itemIndex !== -1) {
+                const item = inventory[sourceLocation][itemIndex];
+                inventory[sourceLocation].splice(itemIndex, 1);
+                item.location = targetLocation;
+                item.lastModifiedBy = currentUser ? currentUser.username : 'Unknown';
+                item.lastModifiedByName = currentUser ? currentUser.displayName : 'Unknown';
+                item.lastModifiedDate = new Date().toISOString().split('T')[0];
+                inventory[targetLocation].push(item);
+                
+                console.log('Item moved via mini location from', sourceLocation, 'to', targetLocation);
+                
+                saveToLocalStorage();
+                renderLocation(sourceLocation);
+                renderLocation(targetLocation);
+            }
+            
+            return false;
+        }
+        
+        function handleMiniLocationClick(locationId) {
+            // Handle mini location clicks when a location is maximized
+            const locationBoxId = locationId + '-box';
+            
+            if (maximizedLocation === locationBoxId) {
+                // Clicking the SAME location that's maximized - CLOSE it
+                console.log(`🔄 Closing current maximized location: ${locationId}`);
+                closeMaximizedLocation();
+            } else if (maximizedLocation && maximizedLocation !== locationBoxId) {
+                // Switch to a DIFFERENT location's maximized view
+                console.log(`🔄 Switching from ${maximizedLocation} to ${locationBoxId}`);
+                toggleMaximize(maximizedLocation);
+                setTimeout(() => {
+                    toggleMaximize(locationBoxId);
+                }, 100);
+            } else if (!maximizedLocation) {
+                // Open the location (nothing currently maximized)
+                console.log(`📖 Opening maximized view: ${locationId}`);
+                toggleMaximize(locationBoxId);
+            }
+        }
+        
+        // Global functions
+        window.logout = logout;
+        window.closePermissionMessage = closePermissionMessage;
+        window.deleteItem = deleteItem;
+        window.zoomIn = zoomIn;
+        window.zoomOut = zoomOut;
+        window.toggleAutoFit = toggleAutoFit;
+        window.switchTab = switchTab;
+        window.updateCharts = updateCharts;
+        window.searchParts = searchParts;
+        window.clearSearch = clearSearch;
+        window.manualMoveItem = manualMoveItem;
+        window.toggleMaximize = toggleMaximize;
+        window.handleMiniLocationClick = handleMiniLocationClick;
+    </script>
+</body>
+</html>

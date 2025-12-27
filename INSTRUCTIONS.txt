@@ -1,0 +1,32 @@
+QUICK DEPLOYMENT INSTRUCTIONS
+==============================
+
+OPTION 1: NETLIFY DROP (EASIEST - 10 seconds!)
+------------------------------------------------
+1. Go to: https://app.netlify.com/drop
+2. Rename barkbone_tracker.html to index.html
+3. Drag and drop the file
+4. Done! Get your live URL
+
+OPTION 2: HEROKU (Most Control)
+---------------------------------
+1. Install Heroku CLI
+2. Open terminal in this folder
+3. Run these commands:
+   
+   heroku login
+   git init
+   git add .
+   git commit -m "Initial commit"
+   heroku create
+   git push heroku master
+   heroku open
+
+OPTION 3: GITHUB PAGES (Free)
+-------------------------------
+1. Create GitHub repository
+2. Upload all files
+3. Enable Pages in settings
+4. Access at yourusername.github.io/repo-name
+
+See README.md for detailed instructions.

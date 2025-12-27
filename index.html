@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barkbone Product Line Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
+        }
+
+        .product-list {
+            background: #fff;
+            border-radius: 10px;
+        }
+
+        .product-header {
+            display: grid;
+            grid-template-columns: 40px 1fr 2fr 100px 120px 100px 120px 120px 120px 150px;
+            gap: 10px;
+            padding: 15px 20px;
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+            border-radius: 10px 10px 0 0;
+            font-size: 14px;
+        }
+
+        .product-row {
+            display: grid;
+            grid-template-columns: 40px 1fr 2fr 100px 120px 100px 120px 120px 120px 150px;
+            gap: 10px;
+            padding: 20px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: move;
+            transition: all 0.3s ease;
+            align-items: center;
+        }
+
+        .product-row:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+            border-color: #667eea;
+        }
+
+        .product-row.dragging {
+            opacity: 0.5;
+            transform: scale(0.98);
+        }
+
+        .product-row.drag-over {
+            border-color: #48bb78;
+            border-style: dashed;
+            background: #f0fff4;
+        }
+
+        .drag-handle {
+            font-size: 24px;
+            color: #a0aec0;
+            cursor: grab;
+            user-select: none;
+            text-align: center;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .product-field {
+            font-size: 14px;
+            color: #2d3748;
+            word-wrap: break-word;
+        }
+
+        .delete-btn {
+            background: #fc8181;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            margin-left: 5px;
+        }
+
+        .delete-btn:hover {
+            background: #f56565;
+            transform: scale(1.05);
+        }
+
+        .edit-btn {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .edit-btn:hover {
+            background: #3182ce;
+            transform: scale(1.05);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .priority-toggle {
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            min-width: 90px;
+            text-align: center;
+            user-select: none;
+            display: inline-block;
+        }
+
+        .priority-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .priority-toggle:active {
+            transform: translateY(0);
+        }
+
+        .priority-toggle.critical {
+            background: #fc8181;
+            color: white;
+            border: 2px solid #c53030;
+        }
+
+        .priority-toggle.high {
+            background: #f6ad55;
+            color: white;
+            border: 2px solid #dd6b20;
+        }
+
+        .priority-toggle.medium {
+            background: #f6e05e;
+            color: #744210;
+            border: 2px solid #d69e2e;
+        }
+
+        .priority-toggle.low {
+            background: #68d391;
+            color: white;
+            border: 2px solid #38a169;
+        }
+
+        .priority-toggle.none {
+            background: #e2e8f0;
+            color: #4a5568;
+            border: 2px solid #cbd5e0;
+        }
+
+        .backer-status {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            text-align: center;
+            display: inline-block;
+            min-width: 80px;
+        }
+
+        .backer-status.positive {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #38a169;
+        }
+
+        .backer-status.negative {
+            background: #fc8181;
+            color: white;
+            border: 2px solid #c53030;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        .backer-status.zero {
+            background: #e2e8f0;
+            color: #4a5568;
+            border: 2px solid #cbd5e0;
+        }
+
+        @keyframes blink {
+            0%, 100% {
+                opacity: 1;
+                box-shadow: 0 0 5px rgba(197, 48, 48, 0.5);
+            }
+            50% {
+                opacity: 0.6;
+                box-shadow: 0 0 15px rgba(197, 48, 48, 0.8);
+            }
+        }
+
+        .part-cell {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+        }
+
+        .part-cell.critical {
+            background: #fc8181;
+            color: white;
+            border: 2px solid #c53030;
+        }
+
+        .part-cell.high {
+            background: #f6ad55;
+            color: white;
+            border: 2px solid #dd6b20;
+        }
+
+        .part-cell.medium {
+            background: #f6e05e;
+            color: #744210;
+            border: 2px solid #d69e2e;
+        }
+
+        .part-cell.low {
+            background: #68d391;
+            color: white;
+            border: 2px solid #38a169;
+        }
+
+        .part-cell.none {
+            background: #e2e8f0;
+            color: #4a5568;
+            border: 2px solid #cbd5e0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #a0aec0;
+            font-size: 18px;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: #5568d3;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: 600;
+            margin: -30px -30px 25px -30px;
+            padding: 20px 30px;
+            color: #333;
+            text-align: center;
+            background: #f7fafc;
+            border-radius: 15px 15px 0 0;
+            position: sticky;
+            top: -30px;
+            z-index: 10;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin: 30px -30px -30px -30px;
+            padding: 20px 30px;
+            background: #f7fafc;
+            border-radius: 0 0 15px 15px;
+            position: sticky;
+            bottom: -30px;
+            z-index: 10;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .btn-cancel {
+            background: #cbd5e0;
+            color: #2d3748;
+        }
+
+        .btn-cancel:hover {
+            background: #a0aec0;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #718096;
+            margin-top: 5px;
+        }
+
+        /* Tab Styles */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #718096;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* History Styles */
+        .history-container {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .history-item.add {
+            border-left-color: #48bb78;
+        }
+
+        .history-item.edit {
+            border-left-color: #4299e1;
+        }
+
+        .history-item.delete {
+            border-left-color: #f56565;
+        }
+
+        .history-item.priority {
+            border-left-color: #ed8936;
+        }
+
+        .history-item.inventory {
+            border-left-color: #9f7aea;
+        }
+
+        .history-item.shipment {
+            border-left-color: #ed8936;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .history-action {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .history-time {
+            font-size: 12px;
+            color: #a0aec0;
+        }
+
+        .history-details {
+            font-size: 13px;
+            color: #4a5568;
+            line-height: 1.8;
+            margin-top: 8px;
+            padding-left: 5px;
+        }
+
+        .history-empty {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+        }
+
+        .btn-clear-history {
+            background: #cbd5e0;
+            color: #2d3748;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .btn-clear-history:hover {
+            background: #a0aec0;
+        }
+
+        /* Inventory Styles */
+        .btn-inventory {
+            background: #9f7aea;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            margin-left: 5px;
+        }
+
+        .btn-inventory:hover {
+            background: #805ad5;
+            transform: scale(1.05);
+        }
+
+        .inventory-type {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .radio-option:hover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"]:checked {
+            accent-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🦴 Barkbone Product Line Tracker</h1>
+        <p class="subtitle">Drag and drop to prioritize your products</p>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="totalProducts">0</div>
+                <div class="stat-label">Total Products</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('products')">📦 Products</button>
+            <button class="tab" onclick="switchTab('history')">📜 History</button>
+        </div>
+
+        <div class="controls">
+            <div>
+                <button class="btn btn-primary" onclick="openModal()">➕ Add New Product</button>
+                <button class="btn btn-primary" onclick="openInventoryModal()" style="background: #9f7aea;">📦 Inventory / Ship</button>
+                <button class="btn btn-primary" onclick="openShipmentModal()" style="background: #ed8936;">🚚 Add Shipment</button>
+            </div>
+            <div>
+                <button class="btn btn-secondary" onclick="generatePDF()">🖨️ Print PDF</button>
+                <button class="btn btn-secondary" onclick="exportData()">💾 Export Data</button>
+                <button class="btn btn-secondary" onclick="importData()">📂 Import Data</button>
+                <button class="btn btn-danger" onclick="clearAll()">🗑️ Clear All</button>
+            </div>
+        </div>
+
+        <div id="productsTab" class="tab-content active">
+        <div class="product-list">
+            <div class="product-header">
+                <div></div>
+                <div>Part Number</div>
+                <div>Description</div>
+                <div>Priority</div>
+                <div>Open PO</div>
+                <div>Box Size</div>
+                <div>Case Pack</div>
+                <div>Backer Stock</div>
+                <div>Backer Status</div>
+                <div>Amount Needed</div>
+                <div>Actions</div>
+            </div>
+            <div id="productContainer">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📦</div>
+                    <div>No products yet. Click "Add New Product" to get started!</div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <div id="historyTab" class="tab-content">
+            <div class="history-container">
+                <button class="btn-clear-history" onclick="clearHistory()">Clear History</button>
+                <div id="historyContainer">
+                    <div class="history-empty">No history yet. Changes will appear here.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalTitle">Add New Product</div>
+            <form id="productForm">
+                <div class="form-group">
+                    <label for="partNumber">Part Number *</label>
+                    <input type="text" id="partNumber" required placeholder="Enter part number">
+                </div>
+                <div class="form-group">
+                    <label for="description">Description *</label>
+                    <input type="text" id="description" required placeholder="Enter product description">
+                </div>
+                <div class="form-group">
+                    <label for="openPO">Open PO</label>
+                    <input type="text" id="openPO" placeholder="Enter open PO">
+                </div>
+                <div class="form-group">
+                    <label for="boxSize">Box Size</label>
+                    <input type="text" id="boxSize" placeholder="Enter box size (e.g., 24.0X15.0X4.0)">
+                </div>
+                <div class="form-group">
+                    <label for="casePack">Case Pack</label>
+                    <input type="text" id="casePack" placeholder="Enter case pack quantity">
+                </div>
+                <div class="form-group">
+                    <label for="backerStock">Backer Stock</label>
+                    <input type="text" id="backerStock" placeholder="Enter backer stock">
+                </div>
+                <div class="form-group">
+                    <label for="amountNeeded">Amount Needed</label>
+                    <input type="text" id="amountNeeded" placeholder="Enter amount needed">
+                </div>
+                <div class="form-group">
+                    <label for="priority">Priority</label>
+                    <select id="priority" style="width: 100%; padding: 12px 15px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                        <option value="none">None</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Add Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" style="display: none;" accept=".json">
+
+    <!-- Add Inventory Modal -->
+    <div id="inventoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Inventory Management</div>
+            <form id="inventoryForm">
+                <div class="form-group">
+                    <label>Select Product *</label>
+                    <select id="inventoryProduct" required style="width: 100%; padding: 12px 15px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                        <option value="">-- Select a Product --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Transaction Type *</label>
+                    <div class="inventory-type">
+                        <label class="radio-option">
+                            <input type="radio" name="inventoryType" value="add_backers" required onchange="updateShipCalculation()">
+                            <span>➕ Add Backers</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="inventoryType" value="ship" required onchange="updateShipCalculation()">
+                            <span>📦 Ship Units</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inventoryAmount">Amount *</label>
+                    <input type="number" id="inventoryAmount" required placeholder="Enter amount" min="1" step="1" oninput="updateShipCalculation()">
+                    <div id="shipCalculation" style="margin-top: 8px; padding: 10px; background: #edf2f7; border-radius: 6px; font-size: 13px; color: #2d3748; display: none;"></div>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-cancel" onclick="closeInventoryModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="inventorySubmitBtn">Process Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Shipment Modal -->
+    <div id="shipmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Add Shipment</div>
+            <form id="shipmentForm">
+                <div class="form-group">
+                    <label>Select Product *</label>
+                    <select id="shipmentProduct" required style="width: 100%; padding: 12px 15px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                        <option value="">-- Select a Product --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="shipmentQuantity">Quantity to Ship *</label>
+                    <input type="number" id="shipmentQuantity" required placeholder="Enter quantity" min="1" step="1">
+                </div>
+                <div class="form-group">
+                    <label for="shipmentDate">Shipment Date *</label>
+                    <input type="date" id="shipmentDate" required style="width: 100%; padding: 12px 15px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px;">
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-cancel" onclick="closeShipmentModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Process Shipment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let products = [];
+        let draggedElement = null;
+        let editingProductId = null;
+        let history = [];
+
+        // Priority order for toggling
+        const priorityOrder = ['none', 'low', 'medium', 'high', 'critical'];
+
+        // Load data from localStorage on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            loadFromStorage();
+            loadHistory();
+            renderProducts();
+            renderHistory();
+        });
+
+        function openModal() {
+            editingProductId = null;
+            document.getElementById('modalTitle').textContent = 'Add New Product';
+            document.getElementById('submitBtn').textContent = 'Add Product';
+            document.getElementById('productModal').style.display = 'block';
+            document.getElementById('productForm').reset();
+        }
+
+        function openEditModal(id) {
+            editingProductId = id;
+            const product = products.find(p => p.id === id);
+            
+            if (product) {
+                document.getElementById('modalTitle').textContent = 'Edit Product';
+                document.getElementById('submitBtn').textContent = 'Update Product';
+                document.getElementById('partNumber').value = product.partNumber;
+                document.getElementById('description').value = product.description;
+                document.getElementById('openPO').value = product.openPO;
+                document.getElementById('boxSize').value = product.boxSize || '';
+                document.getElementById('casePack').value = product.casePack || '';
+                document.getElementById('backerStock').value = product.backerStock;
+                document.getElementById('amountNeeded').value = product.amountNeeded;
+                document.getElementById('priority').value = product.priority || 'none';
+                document.getElementById('productModal').style.display = 'block';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('productModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const productModal = document.getElementById('productModal');
+            const inventoryModal = document.getElementById('inventoryModal');
+            const shipmentModal = document.getElementById('shipmentModal');
+            if (event.target == productModal) {
+                closeModal();
+            }
+            if (event.target == inventoryModal) {
+                closeInventoryModal();
+            }
+            if (event.target == shipmentModal) {
+                closeShipmentModal();
+            }
+        }
+
+        document.getElementById('productForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (editingProductId) {
+                // Update existing product
+                const index = products.findIndex(p => p.id === editingProductId);
+                if (index !== -1) {
+                    const oldProduct = {...products[index]};
+                    const newProduct = {
+                        id: editingProductId,
+                        partNumber: document.getElementById('partNumber').value,
+                        description: document.getElementById('description').value,
+                        openPO: document.getElementById('openPO').value,
+                        boxSize: document.getElementById('boxSize').value,
+                        casePack: document.getElementById('casePack').value,
+                        backerStock: document.getElementById('backerStock').value,
+                        amountNeeded: document.getElementById('amountNeeded').value,
+                        priority: document.getElementById('priority').value
+                    };
+                    products[index] = newProduct;
+                    
+                    // Generate detailed change description
+                    let changes = [];
+                    if (oldProduct.partNumber !== newProduct.partNumber) {
+                        changes.push(`Part Number: "${oldProduct.partNumber}" → "${newProduct.partNumber}"`);
+                    }
+                    if (oldProduct.description !== newProduct.description) {
+                        changes.push(`Description: "${oldProduct.description}" → "${newProduct.description}"`);
+                    }
+                    if (oldProduct.openPO !== newProduct.openPO) {
+                        changes.push(`Open PO: "${oldProduct.openPO || 'empty'}" → "${newProduct.openPO || 'empty'}"`);
+                    }
+                    if ((oldProduct.boxSize || '') !== (newProduct.boxSize || '')) {
+                        changes.push(`Box Size: "${oldProduct.boxSize || 'empty'}" → "${newProduct.boxSize || 'empty'}"`);
+                    }
+                    if ((oldProduct.casePack || '') !== (newProduct.casePack || '')) {
+                        changes.push(`Case Pack: "${oldProduct.casePack || 'empty'}" → "${newProduct.casePack || 'empty'}"`);
+                    }
+                    if (oldProduct.backerStock !== newProduct.backerStock) {
+                        changes.push(`Backer Stock: "${oldProduct.backerStock || 'empty'}" → "${newProduct.backerStock || 'empty'}"`);
+                    }
+                    if (oldProduct.amountNeeded !== newProduct.amountNeeded) {
+                        changes.push(`Amount Needed: "${oldProduct.amountNeeded || 'empty'}" → "${newProduct.amountNeeded || 'empty'}"`);
+                    }
+                    if ((oldProduct.priority || 'none') !== newProduct.priority) {
+                        changes.push(`Priority: ${(oldProduct.priority || 'none').toUpperCase()} → ${newProduct.priority.toUpperCase()}`);
+                    }
+                    
+                    const changeDescription = changes.length > 0 
+                        ? `Edited product: ${newProduct.partNumber}<br/>Changes: ${changes.join('<br/>')}` 
+                        : `Edited product: ${newProduct.partNumber} (no changes detected)`;
+                    
+                    addHistory('edit', changeDescription);
+                }
+            } else {
+                // Add new product
+                const product = {
+                    id: Date.now(),
+                    partNumber: document.getElementById('partNumber').value,
+                    description: document.getElementById('description').value,
+                    openPO: document.getElementById('openPO').value,
+                    boxSize: document.getElementById('boxSize').value,
+                    casePack: document.getElementById('casePack').value,
+                    backerStock: document.getElementById('backerStock').value,
+                    amountNeeded: document.getElementById('amountNeeded').value,
+                    priority: document.getElementById('priority').value
+                };
+                products.push(product);
+                const details = [
+                    `Part Number: ${product.partNumber}`,
+                    `Description: ${product.description}`,
+                    `Priority: ${(product.priority || 'none').toUpperCase()}`,
+                    product.openPO ? `Open PO: ${product.openPO}` : null,
+                    product.boxSize ? `Box Size: ${product.boxSize}` : null,
+                    product.casePack ? `Case Pack: ${product.casePack}` : null,
+                    product.backerStock ? `Backer Stock: ${product.backerStock}` : null,
+                    product.amountNeeded ? `Amount Needed: ${product.amountNeeded}` : null
+                ].filter(Boolean).join('<br/>');
+                addHistory('add', `Added new product<br/>${details}`);
+            }
+
+            saveToStorage();
+            renderProducts();
+            closeModal();
+        });
+
+        function renderProducts() {
+            const container = document.getElementById('productContainer');
+            
+            if (products.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📦</div>
+                        <div>No products yet. Click "Add New Product" to get started!</div>
+                    </div>
+                `;
+                updateStats();
+                return;
+            }
+
+            container.innerHTML = products.map((product, index) => {
+                const priority = product.priority || 'none';
+                const priorityLabel = priority.toUpperCase();
+                
+                // Calculate Backer Status (Backer Stock - Open PO)
+                const openPO = parseFloat(product.openPO) || 0;
+                const backerStock = parseFloat(product.backerStock) || 0;
+                const backerStatus = backerStock - openPO;
+                
+                let backerStatusClass = 'zero';
+                let backerStatusDisplay = '-';
+                
+                if (product.openPO !== '' || product.backerStock !== '') {
+                    backerStatusDisplay = backerStatus.toFixed(0);
+                    if (backerStatus < 0) {
+                        backerStatusClass = 'negative';
+                    } else if (backerStatus > 0) {
+                        backerStatusClass = 'positive';
+                    } else {
+                        backerStatusClass = 'zero';
+                    }
+                }
+                
+                return `
+                <div class="product-row" draggable="true" data-id="${product.id}">
+                    <div class="drag-handle">⋮⋮</div>
+                    <div class="product-field">
+                        <div class="part-cell ${priority}">${product.partNumber}</div>
+                    </div>
+                    <div class="product-field">${product.description}</div>
+                    <div class="product-field">
+                        <div class="priority-toggle ${priority}" onclick="togglePriority(${product.id})">
+                            ${priorityLabel}
+                        </div>
+                    </div>
+                    <div class="product-field">${product.openPO || '-'}</div>
+                    <div class="product-field" style="font-size: 11px;">${product.boxSize || '-'}</div>
+                    <div class="product-field">${product.casePack || '-'}</div>
+                    <div class="product-field">${product.backerStock || '-'}</div>
+                    <div class="product-field">
+                        <div class="backer-status ${backerStatusClass}">${backerStatusDisplay}</div>
+                    </div>
+                    <div class="product-field">${product.amountNeeded || '-'}</div>
+                    <div class="action-buttons">
+                        <button class="btn-inventory" onclick="quickAddInventory(${product.id})">+ Inv</button>
+                        <button class="edit-btn" onclick="openEditModal(${product.id})">Edit</button>
+                        <button class="delete-btn" onclick="deleteProduct(${product.id})">Delete</button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            attachDragListeners();
+            updateStats();
+        }
+
+        function togglePriority(productId) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                const currentPriority = product.priority || 'none';
+                const currentIndex = priorityOrder.indexOf(currentPriority);
+                const nextIndex = (currentIndex + 1) % priorityOrder.length;
+                const newPriority = priorityOrder[nextIndex];
+                const details = [
+                    `Part Number: ${product.partNumber}`,
+                    `Description: ${product.description}`,
+                    `Priority Changed: ${currentPriority.toUpperCase()} → ${newPriority.toUpperCase()}`
+                ].join('<br/>');
+                addHistory('priority', `Priority change<br/>${details}`);
+                product.priority = newPriority;
+                saveToStorage();
+                renderProducts();
+            }
+        }
+
+        function attachDragListeners() {
+            const rows = document.querySelectorAll('.product-row');
+            
+            rows.forEach(row => {
+                row.addEventListener('dragstart', handleDragStart);
+                row.addEventListener('dragover', handleDragOver);
+                row.addEventListener('drop', handleDrop);
+                row.addEventListener('dragend', handleDragEnd);
+                row.addEventListener('dragenter', handleDragEnter);
+                row.addEventListener('dragleave', handleDragLeave);
+            });
+        }
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            if (this !== draggedElement) {
+                this.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            if (draggedElement !== this) {
+                const draggedId = parseInt(draggedElement.getAttribute('data-id'));
+                const targetId = parseInt(this.getAttribute('data-id'));
+                
+                const draggedIndex = products.findIndex(p => p.id === draggedId);
+                const targetIndex = products.findIndex(p => p.id === targetId);
+                
+                const [removed] = products.splice(draggedIndex, 1);
+                products.splice(targetIndex, 0, removed);
+                
+                saveToStorage();
+                renderProducts();
+            }
+
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.product-row').forEach(row => {
+                row.classList.remove('drag-over');
+            });
+        }
+
+        function deleteProduct(id) {
+            const product = products.find(p => p.id === id);
+            if (confirm('Are you sure you want to delete this product?')) {
+                const details = [
+                    `Part Number: ${product.partNumber}`,
+                    `Description: ${product.description}`,
+                    `Priority: ${(product.priority || 'none').toUpperCase()}`,
+                    product.openPO ? `Open PO: ${product.openPO}` : null,
+                    product.boxSize ? `Box Size: ${product.boxSize}` : null,
+                    product.casePack ? `Case Pack: ${product.casePack}` : null,
+                    product.backerStock ? `Backer Stock: ${product.backerStock}` : null,
+                    product.amountNeeded ? `Amount Needed: ${product.amountNeeded}` : null
+                ].filter(Boolean).join('<br/>');
+                addHistory('delete', `Deleted product<br/>${details}`);
+                products = products.filter(p => p.id !== id);
+                saveToStorage();
+                renderProducts();
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('totalProducts').textContent = products.length;
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('barkboneProducts', JSON.stringify(products));
+        }
+
+        function loadFromStorage() {
+            const stored = localStorage.getItem('barkboneProducts');
+            if (stored) {
+                products = JSON.parse(stored);
+            }
+        }
+
+        function addHistory(action, description) {
+            const historyItem = {
+                id: Date.now(),
+                action: action,
+                description: description,
+                timestamp: new Date().toISOString()
+            };
+            history.unshift(historyItem);
+            // Keep only last 100 history items
+            if (history.length > 100) {
+                history = history.slice(0, 100);
+            }
+            saveHistory();
+            renderHistory();
+        }
+
+        function saveHistory() {
+            localStorage.setItem('barkboneHistory', JSON.stringify(history));
+        }
+
+        function loadHistory() {
+            const stored = localStorage.getItem('barkboneHistory');
+            if (stored) {
+                history = JSON.parse(stored);
+            }
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('historyContainer');
+            
+            if (history.length === 0) {
+                container.innerHTML = '<div class="history-empty">No history yet. Changes will appear here.</div>';
+                return;
+            }
+
+            container.innerHTML = history.map(item => {
+                const date = new Date(item.timestamp);
+                const timeStr = date.toLocaleString();
+                
+                return `
+                    <div class="history-item ${item.action}">
+                        <div class="history-header">
+                            <span class="history-action">${getActionIcon(item.action)} ${getActionLabel(item.action)}</span>
+                            <span class="history-time">${timeStr}</span>
+                        </div>
+                        <div class="history-details">${item.description}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getActionIcon(action) {
+            const icons = {
+                'add': '✅',
+                'edit': '✏️',
+                'delete': '🗑️',
+                'priority': '🎯',
+                'reorder': '↕️',
+                'inventory': '📦',
+                'shipment': '🚚'
+            };
+            return icons[action] || '📝';
+        }
+
+        function getActionLabel(action) {
+            const labels = {
+                'add': 'Added',
+                'edit': 'Edited',
+                'delete': 'Deleted',
+                'priority': 'Priority Changed',
+                'reorder': 'Reordered',
+                'inventory': 'Inventory Added',
+                'shipment': 'Shipment Processed'
+            };
+            return labels[action] || 'Changed';
+        }
+
+        function openShipmentModal() {
+            const select = document.getElementById('shipmentProduct');
+            select.innerHTML = '<option value="">-- Select a Product --</option>' + 
+                products.map(p => `<option value="${p.id}">${p.partNumber} - ${p.description}</option>`).join('');
+            
+            // Set today's date as default
+            document.getElementById('shipmentDate').valueAsDate = new Date();
+            
+            document.getElementById('shipmentModal').style.display = 'block';
+            document.getElementById('shipmentForm').reset();
+            
+            // Reset date after form reset
+            document.getElementById('shipmentDate').valueAsDate = new Date();
+        }
+
+        function closeShipmentModal() {
+            document.getElementById('shipmentModal').style.display = 'none';
+        }
+
+        document.getElementById('shipmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const productId = parseInt(document.getElementById('shipmentProduct').value);
+            const quantity = parseInt(document.getElementById('shipmentQuantity').value);
+            const date = document.getElementById('shipmentDate').value;
+            
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                // Subtract from Open PO
+                const oldOpenPO = parseInt(product.openPO) || 0;
+                const newOpenPO = Math.max(0, oldOpenPO - quantity);
+                product.openPO = newOpenPO.toString();
+                
+                // Subtract from Box Stock
+                const oldBoxStock = parseInt(product.boxStock) || 0;
+                const newBoxStock = Math.max(0, oldBoxStock - quantity);
+                product.boxStock = newBoxStock.toString();
+                
+                // Subtract from Backer Stock
+                const oldBackerStock = parseInt(product.backerStock) || 0;
+                const newBackerStock = Math.max(0, oldBackerStock - quantity);
+                product.backerStock = newBackerStock.toString();
+                
+                // Format date for display
+                const dateObj = new Date(date);
+                const formattedDate = dateObj.toLocaleDateString();
+                
+                // Create detailed history entry
+                const historyDetails = [
+                    `Part Number: ${product.partNumber}`,
+                    `Description: ${product.description}`,
+                    `Quantity Shipped: ${quantity}`,
+                    `Date: ${formattedDate}`,
+                    `Open PO: ${oldOpenPO} → ${newOpenPO}`,
+                    `Box Stock: ${oldBoxStock} → ${newBoxStock}`,
+                    `Backer Stock: ${oldBackerStock} → ${newBackerStock}`
+                ].join('<br/>');
+                
+                addHistory('shipment', `Shipment processed<br/>${historyDetails}`);
+                
+                saveToStorage();
+                renderProducts();
+                closeShipmentModal();
+            }
+        });
+
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all history?')) {
+                history = [];
+                saveHistory();
+                renderHistory();
+            }
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            if (tabName === 'products') {
+                document.getElementById('productsTab').classList.add('active');
+            } else if (tabName === 'history') {
+                document.getElementById('historyTab').classList.add('active');
+            }
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(products, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'barkbone_products_' + new Date().toISOString().slice(0,10) + '.json';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            const fileInput = document.getElementById('fileInput');
+            fileInput.click();
+            
+            fileInput.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (Array.isArray(imported)) {
+                            products = imported;
+                            saveToStorage();
+                            renderProducts();
+                            alert('Data imported successfully!');
+                        } else {
+                            alert('Invalid file format!');
+                        }
+                    } catch (error) {
+                        alert('Error reading file!');
+                    }
+                };
+                reader.readAsText(file);
+            };
+        }
+
+        function clearAll() {
+            if (confirm('Are you sure you want to delete ALL products? This cannot be undone!')) {
+                const productList = products.map(p => `• ${p.partNumber} - ${p.description}`).join('<br/>');
+                addHistory('delete', `Cleared all products (${products.length} total)<br/>${productList}`);
+                products = [];
+                saveToStorage();
+                renderProducts();
+            }
+        }
+
+        function openInventoryModal() {
+            const select = document.getElementById('inventoryProduct');
+            select.innerHTML = '<option value="">-- Select a Product --</option>' + 
+                products.map(p => `<option value="${p.id}">${p.partNumber} - ${p.description}</option>`).join('');
+            
+            document.getElementById('inventoryModal').style.display = 'block';
+            document.getElementById('inventoryForm').reset();
+        }
+
+        function quickAddInventory(productId) {
+            const select = document.getElementById('inventoryProduct');
+            select.innerHTML = '<option value="">-- Select a Product --</option>' + 
+                products.map(p => `<option value="${p.id}" ${p.id === productId ? 'selected' : ''}>${p.partNumber} - ${p.description}</option>`).join('');
+            
+            document.getElementById('inventoryModal').style.display = 'block';
+            document.getElementById('inventoryForm').reset();
+            select.value = productId;
+        }
+
+        function closeInventoryModal() {
+            document.getElementById('inventoryModal').style.display = 'none';
+        }
+
+        document.getElementById('inventoryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const productId = parseInt(document.getElementById('inventoryProduct').value);
+            const inventoryType = document.querySelector('input[name="inventoryType"]:checked').value;
+            const amount = parseInt(document.getElementById('inventoryAmount').value);
+            
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                if (inventoryType === 'add_backers') {
+                    const oldValue = parseInt(product.backerStock) || 0;
+                    const newValue = oldValue + amount;
+                    product.backerStock = newValue.toString();
+                    addHistory('inventory', `Added ${amount} backers to ${product.partNumber}<br/>Backer Stock: ${oldValue} → ${newValue}`);
+                } else if (inventoryType === 'ship') {
+                    // Shipping calculation:
+                    // For each unit shipped: subtract 1 backer
+                    
+                    const oldBackerStock = parseInt(product.backerStock) || 0;
+                    const newBackerStock = oldBackerStock - amount;
+                    product.backerStock = newBackerStock.toString();
+                    
+                    const historyDetails = [
+                        `Shipped ${amount} units from ${product.partNumber}`,
+                        `Backer Stock: ${oldBackerStock} → ${newBackerStock} (-${amount})`
+                    ].join('<br/>');
+                    addHistory('inventory', historyDetails);
+                }
+                
+                saveToStorage();
+                renderProducts();
+                closeInventoryModal();
+            }
+        });
+
+        function updateShipCalculation() {
+            const productId = parseInt(document.getElementById('inventoryProduct').value);
+            const inventoryType = document.querySelector('input[name="inventoryType"]:checked')?.value;
+            const amount = parseInt(document.getElementById('inventoryAmount').value) || 0;
+            const calculationDiv = document.getElementById('shipCalculation');
+            
+            if (inventoryType === 'ship' && amount > 0 && productId) {
+                const product = products.find(p => p.id === productId);
+                if (product) {
+                    calculationDiv.innerHTML = `
+                        <strong>This will subtract:</strong><br/>
+                        • Backers: -${amount} units
+                    `;
+                    calculationDiv.style.display = 'block';
+                } else {
+                    calculationDiv.style.display = 'none';
+                }
+            } else {
+                calculationDiv.style.display = 'none';
+            }
+        }
+
+        function generatePDF() {
+            const printWindow = window.open('', '_blank');
+            const priorityColors = {
+                'critical': '#fc8181',
+                'high': '#f6ad55',
+                'medium': '#f6e05e',
+                'low': '#68d391',
+                'none': '#e2e8f0'
+            };
+            
+            const priorityTextColors = {
+                'critical': 'white',
+                'high': 'white',
+                'medium': '#744210',
+                'low': 'white',
+                'none': '#4a5568'
+            };
+
+            const html = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Barkbone Product List - ${new Date().toLocaleDateString()}</title>
+                    <style>
+                        @media print {
+                            @page {
+                                size: landscape;
+                                margin: 0.5in;
+                            }
+                        }
+                        body {
+                            font-family: Arial, sans-serif;
+                            padding: 20px;
+                        }
+                        h1 {
+                            color: #667eea;
+                            text-align: center;
+                            margin-bottom: 10px;
+                        }
+                        .date {
+                            text-align: center;
+                            color: #666;
+                            margin-bottom: 30px;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-top: 20px;
+                        }
+                        th {
+                            background: #667eea;
+                            color: white;
+                            padding: 12px;
+                            text-align: left;
+                            font-weight: 600;
+                            border: 1px solid #5568d3;
+                        }
+                        td {
+                            padding: 10px 12px;
+                            border: 1px solid #e2e8f0;
+                        }
+                        tr:nth-child(even) {
+                            background: #f7fafc;
+                        }
+                        .part-number {
+                            font-weight: 700;
+                            padding: 6px 10px;
+                            border-radius: 4px;
+                            display: inline-block;
+                        }
+                        .priority {
+                            font-weight: 700;
+                            padding: 6px 10px;
+                            border-radius: 4px;
+                            display: inline-block;
+                            text-transform: uppercase;
+                        }
+                        .backer-status {
+                            font-weight: 700;
+                            padding: 6px 10px;
+                            border-radius: 4px;
+                            display: inline-block;
+                        }
+                        .status-positive {
+                            background: #c6f6d5;
+                            color: #22543d;
+                        }
+                        .status-negative {
+                            background: #fc8181;
+                            color: white;
+                        }
+                        .status-zero {
+                            background: #e2e8f0;
+                            color: #4a5568;
+                        }
+                        .footer {
+                            margin-top: 40px;
+                            text-align: center;
+                            color: #a0aec0;
+                            font-size: 12px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>🦴 Barkbone Product Line Tracker</h1>
+                    <div class="date">Generated: ${new Date().toLocaleString()}</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Part Number</th>
+                                <th>Description</th>
+                                <th>Priority</th>
+                                <th>Open PO</th>
+                                <th>Box Size</th>
+                                <th>Case Pack</th>
+                                <th>Backer Stock</th>
+                                <th>Backer Status</th>
+                                <th>Amount Needed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${products.map((product, index) => {
+                                const priority = product.priority || 'none';
+                                const openPO = parseFloat(product.openPO) || 0;
+                                const backerStock = parseFloat(product.backerStock) || 0;
+                                const backerStatus = backerStock - openPO;
+                                
+                                let statusClass = 'status-zero';
+                                let statusDisplay = '-';
+                                
+                                if (product.openPO !== '' || product.backerStock !== '') {
+                                    statusDisplay = backerStatus.toFixed(0);
+                                    if (backerStatus < 0) {
+                                        statusClass = 'status-negative';
+                                    } else if (backerStatus > 0) {
+                                        statusClass = 'status-positive';
+                                    }
+                                }
+                                
+                                return `
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td>
+                                            <span class="part-number" style="background: ${priorityColors[priority]}; color: ${priorityTextColors[priority]};">
+                                                ${product.partNumber}
+                                            </span>
+                                        </td>
+                                        <td>${product.description}</td>
+                                        <td>
+                                            <span class="priority" style="background: ${priorityColors[priority]}; color: ${priorityTextColors[priority]};">
+                                                ${priority.toUpperCase()}
+                                            </span>
+                                        </td>
+                                        <td>${product.openPO || '-'}</td>
+                                        <td>${product.boxSize || '-'}</td>
+                                        <td>${product.casePack || '-'}</td>
+                                        <td>${product.backerStock || '-'}</td>
+                                        <td>
+                                            <span class="backer-status ${statusClass}">${statusDisplay}</span>
+                                        </td>
+                                        <td>${product.amountNeeded || '-'}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    <div class="footer">
+                        Total Products: ${products.length} | Barkbone Product Line Tracker
+                    </div>
+                </body>
+                </html>
+            `;
+
+            printWindow.document.write(html);
+            printWindow.document.close();
+            
+            setTimeout(() => {
+                printWindow.print();
+            }, 250);
+        }
+    </script>
+</body>
+</html>
