@@ -1146,6 +1146,9 @@
             attachDragHandlers();
             updateStats();
             populateProductDropdowns();
+
+            // Save the current order to localStorage
+            saveProductOrder();
         }
 
         function updateStats() {
@@ -1229,9 +1232,6 @@
                 // Reorder the products array
                 const [removed] = products.splice(draggedIndex, 1);
                 products.splice(targetIndex, 0, removed);
-
-                // Save the new order
-                saveProductOrder();
 
                 renderProducts();
             }
