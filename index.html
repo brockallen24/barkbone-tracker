@@ -630,7 +630,7 @@
                 </div>
                 <div class="form-group">
                     <label for="boxSize">Box Size</label>
-                    <input type="number" id="boxSize" min="0">
+                    <input type="text" id="boxSize" placeholder="e.g., 12x6x6">
                 </div>
                 <div class="form-group">
                     <label for="casePack">Case Pack</label>
@@ -866,7 +866,7 @@
                                 PartNumber: productData.partNumber,
                                 Description: productData.description,
                                 OpenPO: productData.openPO ? parseInt(productData.openPO) : null,
-                                BoxSize: productData.boxSize ? parseInt(productData.boxSize) : null,
+                                BoxSize: productData.boxSize || null,
                                 CasePack: productData.casePack ? parseInt(productData.casePack) : null,
                                 BackerStock: productData.backerStock ? parseInt(productData.backerStock) : null,
                                 AmountNeeded: productData.amountNeeded ? parseInt(productData.amountNeeded) : null,
@@ -907,7 +907,7 @@
                                 PartNumber: productData.partNumber,
                                 Description: productData.description,
                                 OpenPO: productData.openPO ? parseInt(productData.openPO) : null,
-                                BoxSize: productData.boxSize ? parseInt(productData.boxSize) : null,
+                                BoxSize: productData.boxSize || null,
                                 CasePack: productData.casePack ? parseInt(productData.casePack) : null,
                                 BackerStock: productData.backerStock ? parseInt(productData.backerStock) : null,
                                 AmountNeeded: productData.amountNeeded ? parseInt(productData.amountNeeded) : null,
