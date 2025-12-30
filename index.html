@@ -720,18 +720,25 @@
         function saveProductOrder() {
             const order = products.map(p => p.id);
             localStorage.setItem('productOrder', JSON.stringify(order));
+            console.log('Saved order:', order.length, 'products');
         }
 
         function loadProductOrder() {
             const savedOrder = localStorage.getItem('productOrder');
-            return savedOrder ? JSON.parse(savedOrder) : null;
+            const parsed = savedOrder ? JSON.parse(savedOrder) : null;
+            console.log('Loaded order:', parsed ? parsed.length + ' products' : 'none');
+            return parsed;
         }
 
         function applyProductOrder() {
             const savedOrder = loadProductOrder();
             if (!savedOrder || savedOrder.length === 0) {
-                return; // No saved order, keep current order
+                console.log('No saved order to apply');
+                return;
             }
+
+            // Log first few part numbers before sorting
+            console.log('Before sort:', products.slice(0, 3).map(p => p.partNumber));
 
             // Create a map for quick lookup
             const orderMap = new Map();
@@ -746,6 +753,9 @@
                 const orderB = orderMap.has(b.id) ? orderMap.get(b.id) : Infinity;
                 return orderA - orderB;
             });
+
+            // Log first few part numbers after sorting
+            console.log('After sort:', products.slice(0, 3).map(p => p.partNumber));
         }
 
         // ============================================
