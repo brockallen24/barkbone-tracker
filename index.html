@@ -714,48 +714,42 @@
         const priorityOrder = ['none', 'low', 'medium', 'high', 'critical'];
 
         // ============================================
-        // ORDER PERSISTENCE
+        // ORDER PERSISTENCE (saved to Airtable)
         // ============================================
 
-        function saveProductOrder() {
-            const order = products.map(p => p.id);
-            localStorage.setItem('productOrder', JSON.stringify(order));
-            console.log('Saved order:', order.length, 'products');
-        }
+        async function saveProductOrderToAirtable() {
+            // Update SortOrder for all products in Airtable
+            // Airtable allows max 10 records per batch update
+            setSyncStatus('syncing');
 
-        function loadProductOrder() {
-            const savedOrder = localStorage.getItem('productOrder');
-            const parsed = savedOrder ? JSON.parse(savedOrder) : null;
-            console.log('Loaded order:', parsed ? parsed.length + ' products' : 'none');
-            return parsed;
-        }
+            try {
+                const updates = products.map((product, index) => ({
+                    id: product.id,
+                    fields: { SortOrder: index }
+                }));
 
-        function applyProductOrder() {
-            const savedOrder = loadProductOrder();
-            if (!savedOrder || savedOrder.length === 0) {
-                console.log('No saved order to apply');
-                return;
+                // Batch updates in groups of 10 (Airtable limit)
+                for (let i = 0; i < updates.length; i += 10) {
+                    const batch = updates.slice(i, i + 10);
+                    const response = await fetch(AIRTABLE_URL, {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ records: batch })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to save product order');
+                    }
+                }
+
+                setSyncStatus('connected');
+            } catch (error) {
+                console.error('Error saving product order:', error);
+                setSyncStatus('error');
             }
-
-            // Log first few part numbers before sorting
-            console.log('Before sort:', products.slice(0, 3).map(p => p.partNumber));
-
-            // Create a map for quick lookup
-            const orderMap = new Map();
-            savedOrder.forEach((id, index) => {
-                orderMap.set(id, index);
-            });
-
-            // Sort products based on saved order
-            // Items not in saved order go to the end
-            products.sort((a, b) => {
-                const orderA = orderMap.has(a.id) ? orderMap.get(a.id) : Infinity;
-                const orderB = orderMap.has(b.id) ? orderMap.get(b.id) : Infinity;
-                return orderA - orderB;
-            });
-
-            // Log first few part numbers after sorting
-            console.log('After sort:', products.slice(0, 3).map(p => p.partNumber));
         }
 
         // ============================================
@@ -797,11 +791,12 @@
                     casePack: record.fields.CasePack || '',
                     backerStock: record.fields.BackerStock || '',
                     amountNeeded: record.fields.AmountNeeded || '',
-                    priority: record.fields.Priority || 'none'
+                    priority: record.fields.Priority || 'none',
+                    sortOrder: record.fields.SortOrder ?? 9999
                 }));
 
-                // Apply saved order after fetching
-                applyProductOrder();
+                // Sort products by SortOrder field from Airtable
+                products.sort((a, b) => a.sortOrder - b.sortOrder);
 
                 setSyncStatus('connected');
                 return products;
@@ -831,7 +826,8 @@
                                 CasePack: productData.casePack ? parseInt(productData.casePack) : null,
                                 BackerStock: productData.backerStock ? parseInt(productData.backerStock) : null,
                                 AmountNeeded: productData.amountNeeded ? parseInt(productData.amountNeeded) : null,
-                                Priority: productData.priority || 'none'
+                                Priority: productData.priority || 'none',
+                                SortOrder: products.length
                             }
                         }]
                     })
@@ -1156,9 +1152,6 @@
             attachDragHandlers();
             updateStats();
             populateProductDropdowns();
-
-            // Save the current order to localStorage
-            saveProductOrder();
         }
 
         function updateStats() {
@@ -1244,6 +1237,9 @@
                 products.splice(targetIndex, 0, removed);
 
                 renderProducts();
+
+                // Save the new order to Airtable
+                saveProductOrderToAirtable();
             }
 
             return false;
@@ -1282,8 +1278,6 @@
                         await deleteAllProducts();
                         addHistory('delete', 'Deleted all products');
                         products = [];
-                        // Clear saved order when all products are deleted
-                        localStorage.removeItem('productOrder');
                         renderProducts();
                     } catch (error) {
                         alert('Failed to delete all products. Please try again.');
