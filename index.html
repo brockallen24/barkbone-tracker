@@ -537,6 +537,11 @@
         <h1>📦 Inventory Tracker <small style="font-size: 12px; color: #a0aec0;">v2.1</small></h1>
         <div class="subtitle">
             <span id="syncStatus" class="sync-status connected">Connected to Cloud</span>
+            <span style="margin-left: 20px;">
+                👤 Operator: <input type="text" id="operatorName" placeholder="Enter your name"
+                    style="padding: 5px 10px; border: 1px solid #e2e8f0; border-radius: 5px; font-size: 14px; width: 150px;"
+                    onchange="saveOperatorName(this.value)">
+            </span>
         </div>
 
         <!-- Toast notification for feedback -->
@@ -992,6 +997,7 @@
 
         window.addEventListener('DOMContentLoaded', async function() {
             loadHistory();
+            loadOperatorName();
             renderHistory();
 
             try {
@@ -1097,11 +1103,28 @@
 
             try {
                 if (editingProductId) {
+                    // Find original product to track changes
+                    const originalProduct = products.find(p => p.id === editingProductId);
+                    const changes = [];
+
+                    if (originalProduct) {
+                        if (originalProduct.partNumber !== productData.partNumber) changes.push(`Part#: ${originalProduct.partNumber} → ${productData.partNumber}`);
+                        if (originalProduct.description !== productData.description) changes.push(`Description changed`);
+                        if (originalProduct.openPO !== productData.openPO) changes.push(`Open PO: ${originalProduct.openPO || '0'} → ${productData.openPO || '0'}`);
+                        if (originalProduct.boxSize !== productData.boxSize) changes.push(`Box Size: ${originalProduct.boxSize || '-'} → ${productData.boxSize || '-'}`);
+                        if (originalProduct.casePack !== productData.casePack) changes.push(`Case Pack: ${originalProduct.casePack || '0'} → ${productData.casePack || '0'}`);
+                        if (originalProduct.backerStock !== productData.backerStock) changes.push(`Backer Stock: ${originalProduct.backerStock || '0'} → ${productData.backerStock || '0'}`);
+                        if (originalProduct.amountNeeded !== productData.amountNeeded) changes.push(`Amount Needed: ${originalProduct.amountNeeded || '0'} → ${productData.amountNeeded || '0'}`);
+                        if (originalProduct.priority !== productData.priority) changes.push(`Priority: ${originalProduct.priority || 'none'} → ${productData.priority || 'none'}`);
+                    }
+
                     await updateProduct(editingProductId, productData);
-                    addHistory('edit', `Edited product: ${productData.partNumber}`);
+                    const changeDetails = changes.length > 0 ? changes.join(' | ') : 'No field changes detected';
+                    addHistory('edit', `Edited product: ${productData.partNumber}`, changeDetails);
                 } else {
                     await createProduct(productData);
-                    addHistory('add', `Added new product: ${productData.partNumber}`);
+                    const details = `Part#: ${productData.partNumber}, Priority: ${productData.priority || 'none'}`;
+                    addHistory('add', `Added new product: ${productData.partNumber}`, details);
                 }
 
                 await fetchProducts();
@@ -1369,12 +1392,28 @@
             localStorage.setItem('inventory_history', JSON.stringify(history));
         }
 
-        function addHistory(type, description) {
-            const timestamp = new Date().toLocaleString();
-            history.unshift({ type, description, timestamp });
+        function saveOperatorName(name) {
+            localStorage.setItem('operator_name', name);
+        }
 
-            if (history.length > 20) {
-                history = history.slice(0, 20);
+        function getOperatorName() {
+            return localStorage.getItem('operator_name') || 'Unknown';
+        }
+
+        function loadOperatorName() {
+            const saved = localStorage.getItem('operator_name');
+            if (saved) {
+                document.getElementById('operatorName').value = saved;
+            }
+        }
+
+        function addHistory(type, description, details = null) {
+            const timestamp = new Date().toLocaleString();
+            const operator = getOperatorName();
+            history.unshift({ type, description, timestamp, operator, details });
+
+            if (history.length > 50) {
+                history = history.slice(0, 50);
             }
 
             saveHistory();
@@ -1389,12 +1428,17 @@
                 return;
             }
 
-            container.innerHTML = history.map(item => `
-                <div class="history-item ${item.type}">
-                    ${item.description}
-                    <span class="history-timestamp">${item.timestamp}</span>
-                </div>
-            `).join('');
+            container.innerHTML = history.map(item => {
+                const operatorDisplay = item.operator ? `<span style="color: #667eea; font-weight: 600;">by ${item.operator}</span>` : '';
+                const detailsDisplay = item.details ? `<div style="font-size: 11px; color: #718096; margin-top: 4px; padding-left: 10px; border-left: 2px solid #e2e8f0;">${item.details}</div>` : '';
+                return `
+                    <div class="history-item ${item.type}">
+                        <div>${item.description} ${operatorDisplay}</div>
+                        ${detailsDisplay}
+                        <span class="history-timestamp">${item.timestamp}</span>
+                    </div>
+                `;
+            }).join('');
         }
 
         // ============================================
