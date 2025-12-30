@@ -14,6 +14,24 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Generate config.js from secrets
+        run: |
+          cat > config.js << 'CONFIGEOF'
+          // Airtable Configuration (auto-generated during deployment)
+          const AIRTABLE_CONFIG = {
+              apiKey: '${{ secrets.AIRTABLE_API_KEY }}',
+              baseId: '${{ secrets.AIRTABLE_BASE_ID }}',
+              tableId: '${{ secrets.AIRTABLE_TABLE_ID }}'
+          };
+          CONFIGEOF
+
+      - name: Commit config.js
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add config.js
+          git commit -m "Add config.js for deployment" || echo "No changes to commit"
+
       - name: Deploy to Heroku
         run: |
           git remote add heroku https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git
