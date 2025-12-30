@@ -757,6 +757,14 @@
                     if (!response.ok) {
                         const errorData = await response.json();
                         console.error('Airtable error:', errorData);
+
+                        // Check if error is due to missing SortOrder field
+                        const errorMessage = JSON.stringify(errorData).toLowerCase();
+                        if (errorMessage.includes('unknown_field_name') ||
+                            errorMessage.includes('sortorder') ||
+                            errorMessage.includes('unknown field')) {
+                            throw new Error('MISSING_SORTORDER_FIELD');
+                        }
                         throw new Error('Failed to save product order');
                     }
                 }
@@ -770,7 +778,21 @@
             } catch (error) {
                 console.error('Error saving product order:', error);
                 setSyncStatus('error');
-                showToast('✗ Failed to save order!', true);
+
+                if (error.message === 'MISSING_SORTORDER_FIELD') {
+                    showToast('✗ Missing SortOrder field in Airtable!', true);
+                    alert(
+                        'To enable drag-and-drop reordering, please add a "SortOrder" field to your Airtable:\n\n' +
+                        '1. Open your Airtable base\n' +
+                        '2. Click the "+" button to add a new field\n' +
+                        '3. Name it exactly: SortOrder\n' +
+                        '4. Set the field type to: Number\n' +
+                        '5. Save and refresh this page\n\n' +
+                        'Your current order is preserved in this session.'
+                    );
+                } else {
+                    showToast('✗ Failed to save order!', true);
+                }
             }
         }
 
