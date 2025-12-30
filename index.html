@@ -134,7 +134,7 @@
 
         .product-header {
             display: grid;
-            grid-template-columns: 40px 1fr 2fr 100px 120px 100px 120px 120px 120px 150px;
+            grid-template-columns: 40px 40px 1fr 2fr 100px 120px 100px 120px 120px 120px 150px;
             gap: 10px;
             padding: 15px 20px;
             background: #667eea;
@@ -146,7 +146,7 @@
 
         .product-row {
             display: grid;
-            grid-template-columns: 40px 1fr 2fr 100px 120px 100px 120px 120px 120px 150px;
+            grid-template-columns: 40px 40px 1fr 2fr 100px 120px 100px 120px 120px 120px 150px;
             gap: 10px;
             padding: 20px;
             background: white;
@@ -505,7 +505,7 @@
         @media (max-width: 1200px) {
             .product-header,
             .product-row {
-                grid-template-columns: 40px 100px 150px 80px 100px 80px 100px 100px 100px 120px;
+                grid-template-columns: 40px 35px 100px 150px 80px 100px 80px 100px 100px 100px 120px;
                 font-size: 12px;
             }
         }
@@ -572,6 +572,7 @@
         <div class="product-list">
             <div class="product-header">
                 <span>⠿</span>
+                <span>#</span>
                 <span>Part Number</span>
                 <span>Description</span>
                 <span>Priority</span>
@@ -741,14 +742,21 @@
                     });
 
                     if (!response.ok) {
+                        const errorData = await response.json();
+                        console.error('Airtable error:', errorData);
                         throw new Error('Failed to save product order');
                     }
                 }
+
+                // Add history entry for reorder
+                addHistory('reorder', 'Product order updated');
+                renderHistory();
 
                 setSyncStatus('connected');
             } catch (error) {
                 console.error('Error saving product order:', error);
                 setSyncStatus('error');
+                alert('Failed to save order. Check console for details.');
             }
         }
 
@@ -1103,7 +1111,7 @@
                 'none': '#4a5568'
             };
 
-            container.innerHTML = products.map(product => {
+            container.innerHTML = products.map((product, index) => {
                 const priority = product.priority || 'none';
                 const openPO = parseFloat(product.openPO) || 0;
                 const backerStock = parseFloat(product.backerStock) || 0;
@@ -1124,6 +1132,7 @@
                 return `
                     <div class="product-row" draggable="true" data-id="${product.id}">
                         <div class="drag-handle">⠿</div>
+                        <div class="product-field" style="font-weight: bold; text-align: center;">${index + 1}</div>
                         <div class="product-field part-number-cell">
                             <span class="part-number-text" style="background: ${priorityColors[priority]}; color: ${priorityTextColors[priority]};">
                                 ${product.partNumber}
