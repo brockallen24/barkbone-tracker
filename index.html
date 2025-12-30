@@ -532,10 +532,13 @@
 </head>
 <body>
     <div class="container">
-        <h1>📦 Inventory Tracker</h1>
+        <h1>📦 Inventory Tracker <small style="font-size: 12px; color: #a0aec0;">v2.1</small></h1>
         <div class="subtitle">
             <span id="syncStatus" class="sync-status connected">Connected to Cloud</span>
         </div>
+
+        <!-- Toast notification for feedback -->
+        <div id="toast" style="display: none; position: fixed; top: 20px; right: 20px; background: #48bb78; color: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 9999; font-weight: 600;"></div>
 
         <div class="stats-container">
             <div class="stat-card">
@@ -718,6 +721,16 @@
         // ORDER PERSISTENCE (saved to Airtable)
         // ============================================
 
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.background = isError ? '#f56565' : '#48bb78';
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
         async function saveProductOrderToAirtable() {
             // Update SortOrder for all products in Airtable
             // Airtable allows max 10 records per batch update
@@ -753,10 +766,11 @@
                 renderHistory();
 
                 setSyncStatus('connected');
+                showToast('✓ Order saved!');
             } catch (error) {
                 console.error('Error saving product order:', error);
                 setSyncStatus('error');
-                alert('Failed to save order. Check console for details.');
+                showToast('✗ Failed to save order!', true);
             }
         }
 
