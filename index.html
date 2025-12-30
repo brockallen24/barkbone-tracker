@@ -1210,6 +1210,7 @@
                         <div class="product-field" data-label="Backer Status:">
                             <span class="backer-status ${statusClass}">${statusDisplay}</span>
                         </div>
+                        <div class="product-field" data-label="Amount Needed:">${product.amountNeeded || '-'}</div>
                         <div class="action-buttons">
                             <button class="edit-btn" onclick="openEditModal('${product.id}')">✏️ Edit</button>
                             <button class="priority-toggle" onclick="cyclePriority('${product.id}')">⬆️</button>
