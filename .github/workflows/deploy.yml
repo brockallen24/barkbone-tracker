@@ -14,16 +14,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Generate config.js from secrets
+      - name: Generate config.js and deploy to Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+          AIRTABLE_TABLE_ID: ${{ secrets.AIRTABLE_TABLE_ID }}
         run: |
-          echo "const AIRTABLE_CONFIG = { apiKey: '${{ secrets.AIRTABLE_API_KEY }}', baseId: '${{ secrets.AIRTABLE_BASE_ID }}', tableId: '${{ secrets.AIRTABLE_TABLE_ID }}' };" > config.js
+          echo "const AIRTABLE_CONFIG = { apiKey: '${AIRTABLE_API_KEY}', baseId: '${AIRTABLE_BASE_ID}', tableId: '${AIRTABLE_TABLE_ID}' };" > config.js
           cat config.js
-
-      - name: Commit config.js and deploy
-        run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add config.js
-          git commit -m "Add config.js for deployment"
-          git remote add heroku https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git
+          git add -f config.js
+          git commit -m "Add config.js for deployment" || true
+          git remote add heroku https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git
           git push heroku HEAD:main --force
