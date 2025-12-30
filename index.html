@@ -714,6 +714,7 @@
         // ============================================
 
         const AIRTABLE_URL = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.baseId}/${AIRTABLE_CONFIG.tableId}`;
+        const AIRTABLE_HISTORY_URL = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.baseId}/${AIRTABLE_CONFIG.historyTableId || 'History'}`;
 
         // ============================================
         // STATE
@@ -997,8 +998,8 @@
         // ============================================
 
         window.addEventListener('DOMContentLoaded', async function() {
-            loadHistory();
             loadOperatorName();
+            await loadHistory();
             renderHistory();
 
             try {
@@ -1018,13 +1019,15 @@
             document.getElementById('productContainer').innerHTML = `
                 <div class="loading-state">
                     <div class="loading-spinner"></div>
-                    <div>Refreshing products...</div>
+                    <div>Refreshing data...</div>
                 </div>
             `;
 
             try {
                 await fetchProducts();
+                await loadHistory();
                 renderProducts();
+                renderHistory();
             } catch (error) {
                 alert('Failed to refresh data. Please check your connection.');
             }
@@ -1380,18 +1383,75 @@
         }
 
         // ============================================
-        // HISTORY FUNCTIONS
+        // HISTORY FUNCTIONS (Shared via Airtable)
         // ============================================
 
-        function loadHistory() {
-            const savedHistory = localStorage.getItem('inventory_history');
-            if (savedHistory) {
-                history = JSON.parse(savedHistory);
+        async function loadHistory() {
+            try {
+                const response = await fetch(`${AIRTABLE_HISTORY_URL}?maxRecords=50&sort%5B0%5D%5Bfield%5D=Timestamp&sort%5B0%5D%5Bdirection%5D=desc`, {
+                    headers: {
+                        'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`
+                    }
+                });
+
+                if (!response.ok) {
+                    console.log('History table not found or not accessible. Using local storage fallback.');
+                    const savedHistory = localStorage.getItem('inventory_history');
+                    if (savedHistory) {
+                        history = JSON.parse(savedHistory);
+                    }
+                    return;
+                }
+
+                const data = await response.json();
+                history = data.records.map(record => ({
+                    id: record.id,
+                    type: record.fields.Type || 'edit',
+                    description: record.fields.Description || '',
+                    operator: record.fields.Operator || 'Unknown',
+                    details: record.fields.Details || null,
+                    timestamp: record.fields.Timestamp || ''
+                }));
+            } catch (error) {
+                console.error('Error loading history from Airtable:', error);
+                // Fallback to localStorage
+                const savedHistory = localStorage.getItem('inventory_history');
+                if (savedHistory) {
+                    history = JSON.parse(savedHistory);
+                }
             }
         }
 
-        function saveHistory() {
-            localStorage.setItem('inventory_history', JSON.stringify(history));
+        async function saveHistoryToAirtable(historyEntry) {
+            try {
+                const response = await fetch(AIRTABLE_HISTORY_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        records: [{
+                            fields: {
+                                Type: historyEntry.type,
+                                Description: historyEntry.description,
+                                Operator: historyEntry.operator,
+                                Details: historyEntry.details || '',
+                                Timestamp: historyEntry.timestamp
+                            }
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    console.log('Could not save to History table. Saving locally.');
+                    // Fallback to localStorage
+                    localStorage.setItem('inventory_history', JSON.stringify(history));
+                }
+            } catch (error) {
+                console.error('Error saving history to Airtable:', error);
+                localStorage.setItem('inventory_history', JSON.stringify(history));
+            }
         }
 
         function saveOperatorName(name) {
@@ -1409,17 +1469,29 @@
             }
         }
 
-        function addHistory(type, description, details = null) {
-            const timestamp = new Date().toLocaleString();
+        async function addHistory(type, description, details = null) {
+            const timestamp = new Date().toISOString();
             const operator = getOperatorName();
-            history.unshift({ type, description, timestamp, operator, details });
+            const historyEntry = { type, description, timestamp, operator, details };
+
+            history.unshift(historyEntry);
 
             if (history.length > 50) {
                 history = history.slice(0, 50);
             }
 
-            saveHistory();
+            // Save to Airtable (shared across all users)
+            await saveHistoryToAirtable(historyEntry);
             renderHistory();
+        }
+
+        function formatTimestamp(timestamp) {
+            try {
+                const date = new Date(timestamp);
+                return date.toLocaleString();
+            } catch (e) {
+                return timestamp;
+            }
         }
 
         function renderHistory() {
@@ -1433,11 +1505,12 @@
             container.innerHTML = history.map(item => {
                 const operatorDisplay = item.operator ? `<span style="color: #667eea; font-weight: 600;">by ${item.operator}</span>` : '';
                 const detailsDisplay = item.details ? `<div style="font-size: 11px; color: #718096; margin-top: 4px; padding-left: 10px; border-left: 2px solid #e2e8f0;">${item.details}</div>` : '';
+                const formattedTime = formatTimestamp(item.timestamp);
                 return `
                     <div class="history-item ${item.type}">
                         <div>${item.description} ${operatorDisplay}</div>
                         ${detailsDisplay}
-                        <span class="history-timestamp">${item.timestamp}</span>
+                        <span class="history-timestamp">${formattedTime}</span>
                     </div>
                 `;
             }).join('');
