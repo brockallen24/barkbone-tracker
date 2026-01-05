@@ -1050,13 +1050,13 @@ h<!DOCTYPE html>
                 document.getElementById('modalTitle').textContent = 'Edit Product';
                 document.getElementById('submitBtn').textContent = 'Update Product';
                 hh = product.partNumber;
-                document.getElementById('description').value = product.description;
-                document.getElementById('openPO').value = product.openPO;
-                document.getElementById('boxSize').value = product.boxSize || '';
-                document.getElementById('casePack').value = product.casePack || '';
-                document.getElementById('backerStock').value = product.backerStock;
-                document.getElementById('amountNeeded').value = product.amountNeeded;
-                document.getElementById('priority').value = product.priority || 'none';
+                document.getElementById('Description').value = product.description;
+                document.getElementById('OpenPO').value = product.openPO;
+                document.getElementById('BoxSize').value = product.boxSize || '';
+                document.getElementById('CasePack').value = product.casePack || '';
+                document.getElementById('BackerStock').value = product.backerStock;
+                document.getElementById('AmountNeeded').value = product.amountNeeded;
+                document.getElementById('prihority').value = product.priority || 'none';
                 document.getElementById('productModal').style.display = 'block';
             }
         }
@@ -1092,14 +1092,14 @@ h<!DOCTYPE html>
             submitBtn.textContent = 'Saving...';
 
             const productData = {
-                partNumber: document.getElementById('partNumber').value,
-                description: document.getElementById('description').value,
-                openPO: document.getElementById('openPO').value,
-                boxSize: document.getElementById('boxSize').value,
-                casePack: document.getElementById('casePack').value,
-                backerStock: document.getElementById('backerStock').value,
-                amountNeeded: document.getElementById('amountNeeded').value,
-                priority: document.getElementById('priority').value
+                partNumber: document.h.value,
+                description: document.getElementById('Description').value,
+                openPO: document.getElementById('OpenPO').value,
+                boxSize: document.getElementById('BoxSize').value,
+                casePack: document.getElementById('CasePack').value,
+                backerStock: document.getElementById('BackerStock').value,
+                amountNeeded: document.getElementById('AmountNeeded').value,
+                priority: document.getElementById('Priority').value
             };
 
             try {
