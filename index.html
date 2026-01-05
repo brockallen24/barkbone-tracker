@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+h<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -616,15 +616,15 @@
             <form id="productForm">
                 <div class="form-group">
                     <label for="partNumber">Part Number *</label>
-                    <input type="text" id="partNumber" required>
+                    <input type="text" id="PartNumber" required>
                 </div>
                 <div class="form-group">
                     <label for="description">Description *</label>
-                    <textarea id="description" required></textarea>
+                    <textarea id="Description" required></textarea>
                 </div>
                 <div class="form-group">
                     <label for="priority">Priority</label>
-                    <select id="priority">
+                    <select id="Priority">
                         <option value="none">None</option>
                         <option value="low">Low</option>
                         <option value="medium">Medium</option>
@@ -634,23 +634,23 @@
                 </div>
                 <div class="form-group">
                     <label for="openPO">Open PO</label>
-                    <input type="number" id="openPO" min="0">
+                    <input type="number" id="OpenPO" min="0">
                 </div>
                 <div class="form-group">
                     <label for="boxSize">Box Size</label>
-                    <input type="text" id="boxSize" placeholder="e.g., 12x6x6">
+                    <input type="text" id="BoxSize" placeholder="e.g., 12x6x6">
                 </div>
                 <div class="form-group">
                     <label for="casePack">Case Pack</label>
-                    <input type="number" id="casePack" min="0">
+                    <input type="number" id="CasePack" min="0">
                 </div>
                 <div class="form-group">
                     <label for="backerStock">Backer Stock</label>
-                    <input type="number" id="backerStock" min="0">
+                    <input type="number" id="BackerStock" min="0">
                 </div>
                 <div class="form-group">
                     <label for="amountNeeded">Amount Needed</label>
-                    <input type="number" id="amountNeeded" min="0">
+                    <input type="number" id="AmountNeeded" min="0">
                 </div>
                 <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%;">Add Product</button>
             </form>
@@ -1049,7 +1049,7 @@
             if (product) {
                 document.getElementById('modalTitle').textContent = 'Edit Product';
                 document.getElementById('submitBtn').textContent = 'Update Product';
-                document.getElementById('partNumber').value = product.partNumber;
+                hh = product.partNumber;
                 document.getElementById('description').value = product.description;
                 document.getElementById('openPO').value = product.openPO;
                 document.getElementById('boxSize').value = product.boxSize || '';
