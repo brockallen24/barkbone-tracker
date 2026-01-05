@@ -1725,5 +1725,72 @@ h<!DOCTYPE html>
             }, 250);
         }
     </script>
+    <!-- Button Reset Fix for Airtable Updates -->
+    <script>
+        (function() {
+              'use strict';
+
+              const submitBtn = document.getElementById('submitBtn');
+              const form = document.getElementById('productForm');
+
+              if (submitBtn && form) {
+                      const originalFetch = window.fetch;
+                      window.fetch = function(...args) {
+                                const promise = originalFetch.apply(this, args);
+                                const urlStr = args[0] ? args[0].toString() : '';
+
+                                if (urlStr.includes('airtable') || urlStr.includes('/api')) {
+                                            promise
+                                              .then(response => {
+                                                              setTimeout(() => {
+                                                                                if (submitBtn && submitBtn.textContent.includes('Saving')) {
+                                                                                                    submitBtn.disabled = false;
+                                                                                                    submitBtn.textContent = 'Update Product';
+                                                                                }
+                                                              }, 100);
+                                                              return response;
+                                              })
+                                              .catch(error => {
+                                                              setTimeout(() => {
+                                                                                if (submitBtn && submitBtn.textContent.includes('Saving')) {
+                                                                                                    submitBtn.disabled = false;
+                                                                                                    submitBtn.textContent = 'Update Product';
+                                                                                }
+                                                              }, 100);
+                                                              throw error;
+                                              });
+                                }
+
+                                return promise;
+                      };
+
+                      const originalOpen = XMLHttpRequest.prototype.open;
+                      XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+                                this._isSaveRequest = url && (url.includes('airtable') || url.includes('/api'));
+                                return originalOpen.apply(this, [method, url, ...rest]);
+                      };
+
+                      const originalSend = XMLHttpRequest.prototype.send;
+                      XMLHttpRequest.prototype.send = function(...args) {
+                                if (this._isSaveRequest) {
+                                            const resetBtn = () => {
+                                                          setTimeout(() => {
+                                                                          if (submitBtn && submitBtn.textContent.includes('Saving')) {
+                                                                                            submitBtn.disabled = false;
+                                                                                            submitBtn.textContent = 'Update Product';
+                                                                          }
+                                                          }, 100);
+                                            };
+
+                                            this.addEventListener('load', resetBtn);
+                                            this.addEventListener('error', resetBtn);
+                                }
+
+                                return originalSend.apply(this, args);
+                      };
+              }
+        })();
+    </script>
+    </script>
 </body>
 </html>
