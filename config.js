@@ -1,5 +1,6 @@
 // Airtable Configuration
 const AIRTABLE_CONFIG = {
     baseId: 'appitB9dLQE7CzqpR',
-    token: 'pat8QSTRS6XBfKY0N'
+    apiKey: 'pat8QSTRS6XBfKY0N'
+      tableId: 'tblR5cWG21aBDfi49',
 };
