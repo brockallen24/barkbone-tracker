@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airtable API Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .log {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .error {
+            color: #ff4444;
+        }
+        .success {
+            color: #44ff44;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Airtable API Connection Test</h1>
+        <p>This page tests the Airtable API connection to diagnose the spinner issue.</p>
+
+        <button onclick="runTest()">Run Connection Test</button>
+        <button onclick="clearLog()">Clear Log</button>
+
+        <h3>Test Log:</h3>
+        <div id="log" class="log">Click "Run Connection Test" to start...</div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const logEl = document.getElementById('log');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : '📝';
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            logEl.innerHTML += `<div class="${className}">[${timestamp}] ${prefix} ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function clearLog() {
+            logEl.innerHTML = '';
+        }
+
+        async function runTest() {
+            clearLog();
+            log('Starting Airtable API test...', 'info');
+            log('', 'info');
+
+            // Test 1: Check if config.js loaded
+            log('TEST 1: Checking config.js...', 'info');
+            if (typeof AIRTABLE_CONFIG === 'undefined') {
+                log('ERROR: AIRTABLE_CONFIG is not defined!', 'error');
+                log('Make sure config.js is loaded correctly.', 'error');
+                return;
+            } else {
+                log('✓ config.js loaded successfully', 'success');
+                log(`  Base ID: ${AIRTABLE_CONFIG.baseId}`, 'info');
+                log(`  API Key: ${AIRTABLE_CONFIG.apiKey.substring(0, 10)}...`, 'info');
+                log(`  Table ID: ${AIRTABLE_CONFIG.tableId}`, 'info');
+            }
+            log('', 'info');
+
+            // Test 2: Build URL
+            log('TEST 2: Building Airtable URL...', 'info');
+            const AIRTABLE_URL = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.baseId}/${AIRTABLE_CONFIG.tableId}`;
+            log(`  URL: ${AIRTABLE_URL}`, 'info');
+            log('', 'info');
+
+            // Test 3: Test API connection
+            log('TEST 3: Testing API connection...', 'info');
+            log('  Sending request to Airtable...', 'info');
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch(AIRTABLE_URL, {
+                    headers: {
+                        'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`
+                    }
+                });
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                log(`  Response received in ${duration}ms`, 'info');
+                log(`  Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                log('', 'info');
+
+                if (!response.ok) {
+                    log('TEST 4: Reading error response...', 'info');
+                    const errorText = await response.text();
+                    log(`  Error body: ${errorText.substring(0, 500)}`, 'error');
+
+                    if (response.status === 401) {
+                        log('', 'info');
+                        log('⚠️  DIAGNOSIS: Authentication failed!', 'error');
+                        log('   Your API key appears to be invalid or incomplete.', 'error');
+                        log('   Please check your config.js file and update the API key.', 'error');
+                    } else if (response.status === 404) {
+                        log('', 'info');
+                        log('⚠️  DIAGNOSIS: Table not found!', 'error');
+                        log('   Check your baseId or tableId in config.js.', 'error');
+                    }
+                    return;
+                }
+
+                // Test 4: Parse response
+                log('TEST 4: Parsing response data...', 'info');
+                const data = await response.json();
+                log(`  ✓ JSON parsed successfully`, 'success');
+                log('', 'info');
+
+                // Test 5: Check records
+                log('TEST 5: Checking records...', 'info');
+                if (!data.records) {
+                    log('  ERROR: No "records" field in response!', 'error');
+                    log(`  Response keys: ${Object.keys(data).join(', ')}`, 'error');
+                    return;
+                }
+
+                log(`  ✓ Found ${data.records.length} records`, 'success');
+
+                if (data.records.length > 0) {
+                    log('', 'info');
+                    log('Sample record:', 'info');
+                    const sample = data.records[0];
+                    log(`  ID: ${sample.id}`, 'info');
+                    log(`  Fields:`, 'info');
+                    Object.keys(sample.fields).forEach(key => {
+                        log(`    - ${key}: ${JSON.stringify(sample.fields[key])}`, 'info');
+                    });
+                } else {
+                    log('  ⚠️  No records in table (table is empty)', 'error');
+                }
+
+                log('', 'info');
+                log('═══════════════════════════════════════════', 'success');
+                log('✅ ALL TESTS PASSED!', 'success');
+                log('The API connection is working correctly.', 'success');
+                log('If the main app still shows a spinner,', 'info');
+                log('check the browser console for JavaScript errors.', 'info');
+                log('═══════════════════════════════════════════', 'success');
+
+            } catch (error) {
+                log('', 'info');
+                log('TEST FAILED: Network error', 'error');
+                log(`  Error: ${error.message}`, 'error');
+                log(`  Type: ${error.name}`, 'error');
+                log('', 'info');
+                log('⚠️  DIAGNOSIS: Network/CORS error', 'error');
+                log('   This could be:', 'error');
+                log('   1. Network connection issue', 'error');
+                log('   2. CORS policy blocking the request', 'error');
+                log('   3. Airtable API is unreachable', 'error');
+                log('', 'info');
+                log('Please check:', 'info');
+                log('  - Your internet connection', 'info');
+                log('  - Browser console for CORS errors', 'info');
+                log('  - Airtable status page', 'info');
+            }
+        }
+    </script>
+</body>
+</html>
