@@ -1027,6 +1027,12 @@ h<!DOCTYPE html>
                 renderProducts();
             } catch (error) {
                 alert('Failed to refresh data. Please check your connection.');
+                document.getElementById('productContainer').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">Error</div>
+                        <div>Failed to load products. Please check your connection and refresh.</div>
+                    </div>
+                `;
             }
         }
 
@@ -1049,14 +1055,14 @@ h<!DOCTYPE html>
             if (product) {
                 document.getElementById('modalTitle').textContent = 'Edit Product';
                 document.getElementById('submitBtn').textContent = 'Update Product';
-                hh = product.partNumber;
+                document.getElementById('PartNumber').value = product.partNumber;
                 document.getElementById('Description').value = product.description;
                 document.getElementById('OpenPO').value = product.openPO;
                 document.getElementById('BoxSize').value = product.boxSize || '';
                 document.getElementById('CasePack').value = product.casePack || '';
                 document.getElementById('BackerStock').value = product.backerStock;
                 document.getElementById('AmountNeeded').value = product.amountNeeded;
-                document.getElementById('prihority').value = product.priority || 'none';
+                document.getElementById('Priority').value = product.priority || 'none';
                 document.getElementById('productModal').style.display = 'block';
             }
         }
@@ -1092,7 +1098,7 @@ h<!DOCTYPE html>
             submitBtn.textContent = 'Saving...';
 
             const productData = {
-                partNumber: document.h.value,
+                partNumber: document.getElementById('PartNumber').value,
                 description: document.getElementById('Description').value,
                 openPO: document.getElementById('OpenPO').value,
                 boxSize: document.getElementById('BoxSize').value,
@@ -1473,13 +1479,13 @@ h<!DOCTYPE html>
                 const formattedDate = dateObj.toLocaleDateString();
 
                 const historyDetails = `${product.partNumber} - Qty: ${quantity}, Date: ${formattedDate}, Backer Stock: ${oldBackerStock} to ${newBackerStock}`;
-                addHistory('inventory', `Received inventory: ${historyDetails}`);
 
                 try {
                     await updateProduct(productId, {
                         ...product,
                         backerStock: newBackerStock.toString()
                     });
+                    addHistory('inventory', `Received inventory: ${historyDetails}`);
                     await fetchProducts();
                     renderProducts();
                     closeInventoryModal();
@@ -1522,7 +1528,6 @@ h<!DOCTYPE html>
                 const formattedDate = dateObj.toLocaleDateString();
 
                 const historyDetails = `${product.partNumber} - Qty: ${quantity}, Date: ${formattedDate}, Open PO: ${oldOpenPO} to ${newOpenPO}, Backer Stock: ${oldBackerStock} to ${newBackerStock}`;
-                addHistory('shipment', `Shipment processed: ${historyDetails}`);
 
                 try {
                     await updateProduct(productId, {
@@ -1530,6 +1535,7 @@ h<!DOCTYPE html>
                         openPO: newOpenPO.toString(),
                         backerStock: newBackerStock.toString()
                     });
+                    addHistory('shipment', `Shipment processed: ${historyDetails}`);
                     await fetchProducts();
                     renderProducts();
                     closeShipmentModal();
