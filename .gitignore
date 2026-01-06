@@ -11,6 +11,10 @@ Thumbs.db
 # Claude Code settings
 .claude/
 
+# Node modules
+node_modules/
+package-lock.json
+
 # Environment variables (will contain Airtable API key)
 .env
 

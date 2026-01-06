@@ -713,7 +713,35 @@ h<!DOCTYPE html>
         // AIRTABLE CONFIGURATION (loaded from config.js)
         // ============================================
 
-        const AIRTABLE_URL = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.baseId}/${AIRTABLE_CONFIG.tableId}`;
+        let AIRTABLE_URL;
+        let AIRTABLE_CONFIG_LOADED = false;
+
+        // Initialize configuration
+        async function initConfig() {
+            // Check if running on Heroku or production server
+            const isProduction = window.location.hostname !== 'localhost' &&
+                                window.location.hostname !== '127.0.0.1' &&
+                                !window.location.protocol.startsWith('file:');
+
+            if (isProduction) {
+                console.log('Loading config from server (production)...');
+                try {
+                    const response = await fetch('/api/config');
+                    const config = await response.json();
+                    window.AIRTABLE_CONFIG = config;
+                    console.log('✓ Config loaded from server');
+                } catch (error) {
+                    console.error('Failed to load config from server:', error);
+                    throw error;
+                }
+            } else {
+                console.log('Using local config.js');
+                // AIRTABLE_CONFIG already loaded from config.js
+            }
+
+            AIRTABLE_URL = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.baseId}/${AIRTABLE_CONFIG.tableId}`;
+            AIRTABLE_CONFIG_LOADED = true;
+        }
 
         // ============================================
         // STATE
@@ -1015,6 +1043,22 @@ h<!DOCTYPE html>
             loadHistory();
             loadOperatorName();
             renderHistory();
+
+            console.log('DOMContentLoaded - Loading configuration...');
+            try {
+                await initConfig();
+                console.log('DOMContentLoaded - Config loaded successfully');
+            } catch (error) {
+                console.error('DOMContentLoaded - Config error:', error);
+                document.getElementById('productContainer').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️ Error</div>
+                        <div>Failed to load configuration. Please check your setup.</div>
+                        <div style="color: #e53e3e; font-size: 12px; margin-top: 10px;">${error.message || 'Unknown error'}</div>
+                    </div>
+                `;
+                return;
+            }
 
             console.log('DOMContentLoaded - Fetching products...');
             try {
