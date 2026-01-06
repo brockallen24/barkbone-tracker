@@ -1,312 +1,214 @@
-# 🚀 Deploy Barkbone Tracker to Heroku
+# 📦 Barkbone Inventory Tracker
 
-## 📋 Prerequisites
+A modern, cloud-based inventory tracking application with Airtable backend integration.
 
-Before you start, make sure you have:
-- [ ] A Heroku account (free tier works!) - [Sign up here](https://signup.heroku.com/)
-- [ ] Git installed on your computer
-- [ ] Heroku CLI installed
+## 🌟 Features
 
----
+- ✅ Real-time inventory tracking with Airtable
+- ✅ Priority management (Critical, High, Medium, Low)
+- ✅ Drag-and-drop reordering
+- ✅ Receive inventory & process shipments
+- ✅ Activity history tracking
+- ✅ PDF export functionality
+- ✅ Cloud-synced data
+- ✅ Responsive design for mobile & desktop
 
-## 🔧 Step 1: Install Heroku CLI
+## 🚀 Tech Stack
 
-### **Windows:**
-Download and install from: https://devcenter.heroku.com/articles/heroku-cli
-
-### **Mac:**
-```bash
-brew tap heroku/brew && brew install heroku
-```
-
-### **Linux:**
-```bash
-curl https://cli-assets.heroku.com/install.sh | sh
-```
-
-**Verify installation:**
-```bash
-heroku --version
-```
+- **Frontend:** HTML, CSS, JavaScript (Vanilla)
+- **Backend:** Node.js + Express (for production hosting)
+- **Database:** Airtable (Cloud NoSQL)
+- **Hosting:** Heroku | Netlify | Vercel
+- **Version Control:** GitHub
 
 ---
 
-## 📦 Step 2: Download Deployment Files
+## 📋 Quick Start Guide
 
-Download these files to a new folder on your computer:
+### For Local Development:
 
-1. [**barkbone_tracker.html**](computer:///mnt/user-data/outputs/barkbone_tracker.html) - Main application
-2. [**barkbone_import_data.json**](computer:///mnt/user-data/outputs/barkbone_import_data.json) - Product data
-3. [**index.php**](computer:///home/user/index.php) - Heroku entry point
-4. [**composer.json**](computer:///home/user/composer.json) - PHP dependency file
-5. [**Procfile**](computer:///home/user/Procfile) - Heroku process file
+```bash
+# 1. Clone the repository
+git clone https://github.com/brockallen24/barkbone-tracker.git
+cd barkbone-tracker
 
-**Create a folder structure like this:**
+# 2. Install dependencies
+npm install
+
+# 3. Configure Airtable (edit config.js with your credentials)
+# See SETUP-GUIDE.md for details
+
+# 4. Start local server
+./start.sh
+# Or: npm start
+
+# 5. Open browser to http://localhost:8000
 ```
-barkbone-heroku/
-├── barkbone_tracker.html
-├── barkbone_import_data.json
-├── index.php
-├── composer.json
-└── Procfile
-```
+
+### For Production (Heroku):
+
+See **[HEROKU-DEPLOY.md](./HEROKU-DEPLOY.md)** for complete deployment instructions.
 
 ---
 
-## 🎯 Step 3: Deploy to Heroku
+## 🔧 Configuration
 
-Open your terminal/command prompt and navigate to your project folder:
+### Airtable Setup
 
-```bash
-cd path/to/barkbone-heroku
+1. Create Airtable account at https://airtable.com
+2. Create a base with required fields (see SETUP-GUIDE.md)
+3. Get your API credentials
+4. Update `config.js` locally or set Heroku environment variables
+
+**Required Airtable Fields:**
+- PartNumber, Description, Priority
+- OpenPO, BoxSize, CasePack
+- BackerStock, AmountNeeded, SortOrder
+
+---
+
+## 📁 Project Structure
+
 ```
-
-### **3.1 Login to Heroku**
-```bash
-heroku login
-```
-Press any key, it will open your browser to login.
-
-### **3.2 Initialize Git Repository**
-```bash
-git init
-git add .
-git commit -m "Initial commit - Barkbone Tracker"
-```
-
-### **3.3 Create Heroku App**
-```bash
-heroku create your-app-name
-```
-Replace `your-app-name` with your desired name (e.g., `barkbone-tracker-2024`)
-
-**Or let Heroku generate a random name:**
-```bash
-heroku create
-```
-
-### **3.4 Deploy to Heroku**
-```bash
-git push heroku master
-```
-Or if you're on main branch:
-```bash
-git push heroku main
-```
-
-### **3.5 Open Your App**
-```bash
-heroku open
+barkbone-tracker/
+├── index.html              # Main application UI
+├── config.js               # Airtable config (local only, in .gitignore)
+├── server.js               # Express server for production
+├── package.json            # Node.js dependencies
+├── Procfile                # Heroku configuration
+├── start.sh                # Local development server
+├── test.html               # API connection tester
+├── test-api.js             # CLI API tester
+├── HEROKU-DEPLOY.md        # Heroku deployment guide
+├── SETUP-GUIDE.md          # Initial setup instructions
+├── START-HERE.md           # Quick start guide
+└── README.md               # This file
 ```
 
 ---
 
-## 🎉 Your App is Live!
+## 🌐 Three-Platform Integration
 
-Your Barkbone Tracker is now accessible at:
-```
-https://your-app-name.herokuapp.com
-```
+This app uses three platforms working together:
 
----
+### 1. GitHub (Code Storage)
+- Version control
+- Code hosting
+- Collaboration
+- Automatic deploys
 
-## 🔄 Updating Your App
+### 2. Airtable (Data Storage)
+- Product inventory database
+- Real-time sync
+- Cloud-based
+- API access
 
-When you make changes to the HTML file:
+### 3. Heroku (Web Hosting)
+- Application hosting
+- Always-on service
+- HTTPS included
+- Easy deployment
 
-```bash
-# Save your changes to the HTML file
-
-# Commit the changes
-git add .
-git commit -m "Updated tracker"
-
-# Deploy to Heroku
-git push heroku master
-```
-
----
-
-## 💡 Alternative: Simple Static Hosting
-
-If you want even simpler hosting (no Heroku CLI needed):
-
-### **Option A: GitHub Pages (Free)**
-1. Create a GitHub repository
-2. Upload `barkbone_tracker.html` (rename to `index.html`)
-3. Enable GitHub Pages in repository settings
-4. Access at: `https://yourusername.github.io/repo-name`
-
-### **Option B: Netlify Drop (Free - Easiest!)**
-1. Go to: https://app.netlify.com/drop
-2. Drag and drop your HTML file
-3. Get instant live URL
-4. No account needed for basic deployment
-
-### **Option C: Vercel (Free)**
-1. Go to: https://vercel.com
-2. Sign up with GitHub
-3. Import your repository
-4. Automatic deployment
+**Workflow:** Code on GitHub → Deploy to Heroku → Data stored in Airtable
 
 ---
 
-## 📁 Files Explained
+## 🚀 Deployment Options
 
-### **barkbone_tracker.html**
-- Your main application
-- Contains all features and functionality
-- Works 100% client-side (no server needed)
+### Option 1: Heroku (Recommended)
+- See [HEROKU-DEPLOY.md](./HEROKU-DEPLOY.md)
+- Free tier available
+- Automatic HTTPS
+- GitHub integration
 
-### **barkbone_import_data.json**
-- 34 products ready to import
-- Optional - users can import this file from the app
+### Option 2: Netlify
+- Deploy static site
+- Environment variables
+- Serverless functions
 
-### **index.php**
-- Redirects to barkbone_tracker.html
-- Required for Heroku to recognize the app
+### Option 3: Vercel
+- Import from GitHub
+- Environment variables
+- Auto-deploy
 
-### **composer.json**
-- Empty JSON file
-- Required for Heroku PHP buildpack
-
-### **Procfile**
-- Tells Heroku how to run the app
-- Configures Apache web server
+### Option 4: Local Server
+- `./start.sh` or `npm start`
+- Good for development
+- No deployment needed
 
 ---
 
-## 🔒 Important Notes
+## 🔒 Security
 
-### **Data Storage:**
-- All data is stored in the user's browser (localStorage)
-- Data is NOT stored on the server
-- Each user has their own private data
-- Completely secure and private
-
-### **No Backend Required:**
-- This is a client-side app
-- No database needed
-- No server-side code
-- Just HTML/JavaScript/CSS
-
-### **Heroku Free Tier:**
-- ✅ Perfect for this app
-- ✅ No credit card required
-- ✅ App sleeps after 30 min of inactivity
-- ✅ Wakes up automatically when accessed
-- ⚠️ Free tier has 550 hours/month (23 days)
-- 💡 Add credit card for 1000 hours/month
+- ✅ API keys in environment variables
+- ✅ `config.js` excluded from Git
+- ✅ GitHub push protection enabled
+- ✅ No secrets in codebase
+- ✅ Secure HTTPS on Heroku
 
 ---
 
 ## 🐛 Troubleshooting
 
-### **App not loading?**
+### "Failed to load products" error
+**Solution:** Don't open `index.html` directly. Use `./start.sh` or deploy to Heroku.
+
+### API connection errors
+1. Check browser console (F12)
+2. Verify API key is correct
+3. Run `node test-api.js`
+4. Check Airtable API status
+
+### Heroku issues
 ```bash
-# Check logs
-heroku logs --tail
-```
-
-### **"No web processes running"?**
-```bash
-# Scale web dyno
-heroku ps:scale web=1
-```
-
-### **Want to change app name?**
-```bash
-# Rename app
-heroku apps:rename new-name --app old-name
-```
-
-### **Forgot your app URL?**
-```bash
-# Get app info
-heroku apps:info
+heroku logs --tail    # View logs
+heroku config         # Check environment variables
+heroku restart        # Restart app
 ```
 
 ---
 
-## 📊 Quick Deployment Checklist
+## 📚 Documentation
 
-- [ ] Heroku CLI installed
-- [ ] Logged in to Heroku
-- [ ] Files downloaded to folder
-- [ ] Git initialized
-- [ ] Files committed
-- [ ] Heroku app created
-- [ ] Code pushed to Heroku
-- [ ] App opens in browser
-- [ ] Import data file works
-- [ ] Features tested
+- **[SETUP-GUIDE.md](./SETUP-GUIDE.md)** - Airtable configuration
+- **[HEROKU-DEPLOY.md](./HEROKU-DEPLOY.md)** - Heroku deployment
+- **[START-HERE.md](./START-HERE.md)** - Quick start
+- **[RESOLUTION.md](./RESOLUTION.md)** - Bug fixes
 
 ---
 
-## 🎯 Recommended: Netlify Drop (Easiest Method)
+## 🤝 Contributing
 
-**If you want the ABSOLUTE EASIEST deployment:**
-
-1. **Go to:** https://app.netlify.com/drop
-2. **Rename:** `barkbone_tracker.html` to `index.html`
-3. **Drag & Drop:** Drop the file onto the page
-4. **Done!** Get your live URL instantly
-
-**Advantages:**
-- ✅ No CLI needed
-- ✅ No Git needed
-- ✅ No configuration files needed
-- ✅ Instant deployment (< 10 seconds)
-- ✅ Free forever
-- ✅ Never sleeps
-- ✅ Custom domain available
+1. Fork the repository
+2. Create a feature branch
+3. Commit changes
+4. Push to branch
+5. Create Pull Request
 
 ---
 
-## 🌐 Your App URLs
+## 📝 License
 
-After deployment, your app will be accessible at:
-
-**Heroku:**
-```
-https://your-app-name.herokuapp.com
-```
-
-**Netlify:**
-```
-https://random-name-12345.netlify.app
-```
-
-**GitHub Pages:**
-```
-https://yourusername.github.io/repo-name
-```
+MIT License
 
 ---
 
-## 📞 Need Help?
+## 🔗 Links
 
-### **Heroku Issues:**
-- Check logs: `heroku logs --tail`
-- Restart app: `heroku restart`
-- View config: `heroku config`
-
-### **App Issues:**
-- Check browser console (F12)
-- Clear browser cache
-- Try incognito mode
+- **Repository:** https://github.com/brockallen24/barkbone-tracker
+- **Airtable API:** https://airtable.com/developers/web/api/introduction
+- **Heroku Docs:** https://devcenter.heroku.com/
 
 ---
 
-## ✨ You're All Set!
+## 📞 Support
 
-Choose your preferred method:
-- **Easiest:** Netlify Drop (drag & drop)
-- **Most Control:** Heroku (CLI deployment)
-- **Free Forever:** GitHub Pages
-
-Your Barkbone Tracker will be live and accessible from anywhere! 🚀
+For help:
+1. Check documentation files
+2. Review console errors (F12)
+3. Check Heroku logs if deployed
+4. Create GitHub issue
 
 ---
 
-*Need more help? Check Heroku docs: https://devcenter.heroku.com/*
+**Built for efficient inventory management 📦**
