@@ -1,6 +1,6 @@
 // Airtable Configuration
 const AIRTABLE_CONFIG = {
-    baseId: 'appitB9dLQE7CzqpR',
-    apiKey: 'pat8QSTRS6XBfKY0N',
-      tableId: 'tblR5cWG21aBDfi49',
+      baseId: 'appVFThGxG2FiB1ig',
+      apiKey: 'pat8QSTRs6XBfkY0N',
+      tableId: 'tblqNkvmQn9cGgLpo'
 };
