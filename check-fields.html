@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airtable Field Checker</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+        }
+        button:hover { background: #5568d3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .result {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 4px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+        .error { border-left-color: #ff4444; background: #fff5f5; }
+        .success { border-left-color: #44ff44; background: #f0fff0; }
+        .field-list {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .field-list li {
+            margin: 5px 0;
+            font-family: monospace;
+        }
+        .missing { color: #ff4444; }
+        .present { color: #44aa44; }
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Airtable Field Checker</h1>
+        <p>This tool checks what fields exist in your Airtable base and what's needed.</p>
+
+        <button onclick="checkFields()">Check Airtable Fields</button>
+        <button onclick="window.location.href='/import.html'">Go to Import Tool</button>
+        <button onclick="window.location.href='/'">Back to Tracker</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        let AIRTABLE_URL;
+        const REQUIRED_FIELDS = [
+            { name: 'PartNumber', type: 'singleLineText' },
+            { name: 'Description', type: 'multilineText or singleLineText' },
+            { name: 'Priority', type: 'singleSelect' },
+            { name: 'OpenPO', type: 'singleLineText or number' },
+            { name: 'BoxSize', type: 'singleLineText' },
+            { name: 'CasePack', type: 'number' },
+            { name: 'BackerStock', type: 'singleLineText or number' },
+            { name: 'AmountNeeded', type: 'singleLineText or number' },
+            { name: 'SortOrder', type: 'number' }
+        ];
+
+        async function initConfig() {
+            const isProduction = window.location.hostname !== 'localhost' &&
+                                window.location.hostname !== '127.0.0.1' &&
+                                !window.location.protocol.startsWith('file:');
+
+            if (isProduction) {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                window.AIRTABLE_CONFIG = config;
+            }
+
+            AIRTABLE_URL = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.baseId}/${AIRTABLE_CONFIG.tableId}`;
+        }
+
+        async function checkFields() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>⏳ Checking Airtable table...</p>';
+
+            await initConfig();
+
+            try {
+                // Try to get table schema by making a request
+                const response = await fetch(`${AIRTABLE_URL}?maxRecords=1`, {
+                    headers: {
+                        'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Error Accessing Airtable</h3>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                            <p><strong>Error:</strong> ${errorText.substring(0, 300)}</p>
+                            <hr>
+                            <h4>Common Issues:</h4>
+                            <ul>
+                                <li><strong>401:</strong> API key is invalid</li>
+                                <li><strong>404:</strong> Table doesn't exist or table ID is wrong</li>
+                                <li><strong>403:</strong> API key doesn't have access to this base</li>
+                            </ul>
+                            <hr>
+                            <h4>✅ Solution:</h4>
+                            <p>1. Go to your Airtable base</p>
+                            <p>2. Create a table (or use existing table)</p>
+                            <p>3. Make sure the Table ID in Heroku config matches: <code>${AIRTABLE_CONFIG.tableId}</code></p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (data.records && data.records.length > 0) {
+                    // Table has records, check fields
+                    const existingFields = Object.keys(data.records[0].fields);
+
+                    const requiredFieldNames = REQUIRED_FIELDS.map(f => f.name);
+                    const missingFields = requiredFieldNames.filter(f => !existingFields.includes(f));
+                    const extraFields = existingFields.filter(f => !requiredFieldNames.includes(f));
+
+                    let html = '<div class="result">';
+                    html += '<h3>📊 Table Analysis</h3>';
+                    html += `<p><strong>Base ID:</strong> ${AIRTABLE_CONFIG.baseId}</p>`;
+                    html += `<p><strong>Table ID:</strong> ${AIRTABLE_CONFIG.tableId}</p>`;
+                    html += `<p><strong>Records in table:</strong> ${data.records.length}</p>`;
+
+                    if (missingFields.length === 0) {
+                        html += '<h3 class="present">✅ All Required Fields Present!</h3>';
+                        html += '<ul class="field-list">';
+                        requiredFieldNames.forEach(field => {
+                            html += `<li class="present">✓ ${field}</li>`;
+                        });
+                        html += '</ul>';
+                        html += '<hr><p><strong>✅ Your table is ready for import!</strong></p>';
+                        html += '<p><a href="/import.html"><button>Go to Import Tool</button></a></p>';
+                    } else {
+                        html += '<h3 class="missing">⚠️ Missing Required Fields</h3>';
+                        html += '<p>Your Airtable table is missing these fields:</p>';
+                        html += '<ul class="field-list">';
+                        missingFields.forEach(field => {
+                            const fieldInfo = REQUIRED_FIELDS.find(f => f.name === field);
+                            html += `<li class="missing">✗ <strong>${field}</strong> (${fieldInfo.type})</li>`;
+                        });
+                        html += '</ul>';
+
+                        if (existingFields.length > 0) {
+                            html += '<h4>Fields currently in your table:</h4>';
+                            html += '<ul class="field-list">';
+                            existingFields.forEach(field => {
+                                html += `<li>${field}</li>`;
+                            });
+                            html += '</ul>';
+                        }
+
+                        html += '<hr><h4>🔧 How to Fix:</h4>';
+                        html += '<ol>';
+                        html += '<li>Go to your Airtable base: <code>' + AIRTABLE_CONFIG.baseId + '</code></li>';
+                        html += '<li>Open the table: <code>' + AIRTABLE_CONFIG.tableId + '</code></li>';
+                        html += '<li>Add the missing fields (click + to add field)</li>';
+                        html += '<li>Use these exact field names (case-sensitive!):</li>';
+                        html += '<ul class="field-list">';
+                        missingFields.forEach(field => {
+                            const fieldInfo = REQUIRED_FIELDS.find(f => f.name === field);
+                            html += `<li><code>${field}</code> - Type: ${fieldInfo.type}</li>`;
+                        });
+                        html += '</ul>';
+                        html += '<li>Come back and run import again</li>';
+                        html += '</ol>';
+                    }
+
+                    html += '</div>';
+                    resultDiv.innerHTML = html;
+
+                } else {
+                    // Table exists but is empty
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ Table Exists (Empty)</h3>
+                            <p>Your Airtable table exists but has no records yet.</p>
+                            <p><strong>Base ID:</strong> ${AIRTABLE_CONFIG.baseId}</p>
+                            <p><strong>Table ID:</strong> ${AIRTABLE_CONFIG.tableId}</p>
+                            <hr>
+                            <h4>⚠️ Cannot Check Fields</h4>
+                            <p>The table is empty, so I can't check what fields exist.</p>
+                            <h4>🔧 Two Options:</h4>
+                            <ol>
+                                <li><strong>Option 1: Add fields manually in Airtable</strong>
+                                    <ul class="field-list">
+                                        ${REQUIRED_FIELDS.map(f => `<li><code>${f.name}</code> - ${f.type}</li>`).join('')}
+                                    </ul>
+                                </li>
+                                <li><strong>Option 2: Try import anyway</strong>
+                                    <p>If Airtable doesn't have the fields, it might auto-create them (depends on your base settings).</p>
+                                    <p><a href="/import.html"><button>Try Import</button></a></p>
+                                </li>
+                            </ol>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ Error</h3>
+                        <p><strong>Message:</strong> ${error.message}</p>
+                        <p>Could not connect to Airtable. Check your config vars and network connection.</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
