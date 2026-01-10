@@ -20,5 +20,7 @@ config.js
 # Private credentials file
 YOUR_CREDENTIALS.txt
 
-# Netlify deployment file (contains API token)
+# Netlify deployment files (contain API token)
 index-netlify-deploy.html
+index-for-netlify.html
+deploy-to-netlify.sh
