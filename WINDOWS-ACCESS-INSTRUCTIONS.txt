@@ -1,0 +1,61 @@
+╔═══════════════════════════════════════════════════════════════╗
+║          WINDOWS - HOW TO FIND YOUR DEPLOYMENT FILE          ║
+╚═══════════════════════════════════════════════════════════════╝
+
+YOU'RE ON WINDOWS WITH WSL (Linux)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The file is in your Linux (WSL) environment.
+
+WINDOWS FILE EXPLORER PATH:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Copy and paste this into Windows File Explorer address bar:
+
+\\wsl$\Ubuntu\home\user\barkbone-tracker
+
+OR try this:
+
+\\wsl.localhost\Ubuntu\home\user\barkbone-tracker
+
+Then look for: DEPLOY-THIS-FILE-index.html
+
+HOW TO OPEN IN WINDOWS FILE EXPLORER:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Press Windows Key + R
+2. Paste: \\wsl$\Ubuntu\home\user\barkbone-tracker
+3. Press Enter
+4. Find: DEPLOY-THIS-FILE-index.html
+5. That's your file!
+
+EASIEST METHOD - OPEN FILE DIRECTLY:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+In your WSL terminal, run this command:
+
+explorer.exe .
+
+This will open Windows File Explorer at your current location!
+Then find DEPLOY-THIS-FILE-index.html
+
+ALTERNATIVE - COPY TO WINDOWS DESKTOP:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run this in WSL terminal:
+
+cp DEPLOY-THIS-FILE-index.html /mnt/c/Users/$USER/Desktop/
+
+Then check your Windows Desktop for the file!
+
+(If that doesn't work, replace $USER with your Windows username)
+
+WHAT TO DO NEXT:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Use one of the methods above to find the file
+2. Open https://app.netlify.com/drop in your browser
+3. Drag DEPLOY-THIS-FILE-index.html to Netlify
+4. Get your URL!
+
+╚═══════════════════════════════════════════════════════════════╝
