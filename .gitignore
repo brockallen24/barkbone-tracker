@@ -16,3 +16,6 @@ Thumbs.db
 
 # Airtable configuration with API key
 config.js
+
+# Private credentials file
+YOUR_CREDENTIALS.txt
