@@ -1,0 +1,4 @@
+PartNumber,Description,Priority,OpenPO,BoxSize,CasePack,BackerStock,AmountNeeded,SortOrder
+BB-001,Sample Product 1,high,100,12x6x6,24,50,150,0
+BB-002,Sample Product 2,medium,200,10x8x4,12,75,125,1
+BB-003,Sample Product 3,critical,50,8x8x8,6,20,80,2
