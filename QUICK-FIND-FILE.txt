@@ -1,0 +1,43 @@
+╔═══════════════════════════════════════════════════════════════╗
+║              FIND YOUR FILE - SUPER SIMPLE                    ║
+╚═══════════════════════════════════════════════════════════════╝
+
+YOUR FILE NAME:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DEPLOY-THIS-FILE-index.html
+
+WHERE IT IS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Folder: barkbone-tracker
+Full path: /home/user/barkbone-tracker/DEPLOY-THIS-FILE-index.html
+
+HOW TO OPEN THE FOLDER:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Option 1: In terminal, type:
+cd /home/user/barkbone-tracker
+ls -lh DEPLOY-THIS-FILE-index.html
+
+Option 2: Open file manager and navigate to:
+home → user → barkbone-tracker
+
+WHAT TO DO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Find DEPLOY-THIS-FILE-index.html in that folder
+2. Open browser: https://app.netlify.com/drop  
+3. Drag the file to the browser window
+4. Done!
+
+ALTERNATE FILES (if you can't find DEPLOY-THIS-FILE-index.html):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+These files also work (they're backups):
+- index-for-netlify.html
+- index-netlify-deploy.html
+
+Any of these 3 files will work!
+
+╚═══════════════════════════════════════════════════════════════╝

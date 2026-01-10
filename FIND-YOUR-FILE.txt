@@ -1,0 +1,108 @@
+╔═══════════════════════════════════════════════════════════════╗
+║           HOW TO FIND YOUR DEPLOYMENT FILE                    ║
+║              (Step-by-Step with Pictures)                     ║
+╚═══════════════════════════════════════════════════════════════╝
+
+YOUR FILE IS DEFINITELY HERE! ✅
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Full Path:
+/home/user/barkbone-tracker/DEPLOY-THIS-FILE-index.html
+
+File Name:
+DEPLOY-THIS-FILE-index.html
+
+File Size:
+69KB (69,000 bytes)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+METHOD 1: OPEN FILE MANAGER (EASIEST)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Step 1: Open Your File Manager
+   - Look for an app called "Files" or "File Manager"
+   - Or press Ctrl+Alt+T and type: nautilus /home/user/barkbone-tracker
+
+Step 2: Navigate to the Folder
+   Type this in the address bar:
+   /home/user/barkbone-tracker
+
+Step 3: Find the File
+   Look for a file named:
+   DEPLOY-THIS-FILE-index.html
+   (Size: 69 KB)
+
+Step 4: You Found It!
+   This is the file to upload to Netlify
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+METHOD 2: USE COMMAND LINE TO OPEN FOLDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Copy and paste this command in your terminal:
+
+xdg-open /home/user/barkbone-tracker
+
+This will open the folder in your file manager, and you'll see the file.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+METHOD 3: COPY FILE TO YOUR DESKTOP (EASIEST TO FIND)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run this command to copy the file to your Desktop:
+
+cp /home/user/barkbone-tracker/DEPLOY-THIS-FILE-index.html ~/Desktop/
+
+Now the file will be on your Desktop! Easy to find and drag to Netlify.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT YOU'RE LOOKING FOR:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Icon: 🌐 (HTML file icon - looks like a web page)
+Name: DEPLOY-THIS-FILE-index.html
+Size: 69 KB
+Type: HTML Document
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ALL HTML FILES IN YOUR FOLDER:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+You have these HTML files (all 69KB except one):
+
+1. DEPLOY-THIS-FILE-index.html        ✅ THIS ONE!
+2. index-for-netlify.html              ✅ Also works (backup)
+3. index-netlify-deploy.html           ✅ Also works (backup)
+4. index.html                          ❌ Local use only
+5. inventory_custom_layout (28).html   ❌ Old version
+
+Use file #1, #2, or #3 - they're all the same!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STILL CAN'T FIND IT?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Run this command and I'll show you the file:
+
+ls -lh /home/user/barkbone-tracker/*.html | grep DEPLOY
+
+You should see:
+DEPLOY-THIS-FILE-index.html
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AFTER YOU FIND IT:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Open browser: https://app.netlify.com/drop
+2. Drag DEPLOY-THIS-FILE-index.html to the browser
+3. Wait 10 seconds
+4. Get your URL!
+
+╚═══════════════════════════════════════════════════════════════╝
