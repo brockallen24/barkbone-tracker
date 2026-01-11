@@ -1,0 +1,21 @@
+═══════════════════════════════════════════════════════════════
+COPY THIS AND PASTE INTO CLAUDE CHROME EXTENSION
+═══════════════════════════════════════════════════════════════
+
+I'm on my Airtable base (app79OgMIUBu9sCpq, table tbl0w2qfQMtTI7fwh) and need to create 9 fields for my inventory tracker app. Guide me through creating each field one by one:
+
+1. PartNumber - Single line text
+2. Description - Long text
+3. OpenPO - Number (integer, no negatives)
+4. BoxSize - Single line text
+5. CasePack - Number (integer, no negatives)
+6. BackerStock - Number (integer, no negatives)
+7. AmountNeeded - Number (integer, no negatives)
+8. Priority - Single select (options: none, low, medium, high, critical)
+9. SortOrder - Number (integer, allow negatives)
+
+IMPORTANT: Field names must be EXACTLY as written above (case-sensitive).
+
+Start with field #1 and walk me through clicking the + button, selecting the field type, naming it, and configuring it. After I confirm each field is created, move to the next one.
+
+═══════════════════════════════════════════════════════════════

@@ -1,0 +1,76 @@
+╔═══════════════════════════════════════════════════════════════╗
+║   📋 PASTE THIS INTO CLAUDE CHROME EXTENSION                 ║
+╚═══════════════════════════════════════════════════════════════╝
+
+Copy everything below this line and paste it into Claude Chrome Extension
+while you're on your Airtable base page.
+
+═══════════════════════════════════════════════════════════════
+
+
+I need help setting up fields in my Airtable base. I'm currently on the Airtable page for base ID: app79OgMIUBu9sCpq, table ID: tbl0w2qfQMtTI7fwh
+
+I need to create these 9 fields with exact specifications:
+
+FIELD 1: PartNumber
+- Type: Single line text
+- Name: PartNumber (exactly as written, capital P and N)
+
+FIELD 2: Description
+- Type: Long text
+- Name: Description (exactly as written, capital D)
+
+FIELD 3: OpenPO
+- Type: Number
+- Name: OpenPO (exactly as written, capital O, P, O)
+- Format: Integer
+- Allow negative numbers: No
+
+FIELD 4: BoxSize
+- Type: Single line text
+- Name: BoxSize (exactly as written, capital B and S)
+
+FIELD 5: CasePack
+- Type: Number
+- Name: CasePack (exactly as written, capital C and P)
+- Format: Integer
+- Allow negative numbers: No
+
+FIELD 6: BackerStock
+- Type: Number
+- Name: BackerStock (exactly as written, capital B and S)
+- Format: Integer
+- Allow negative numbers: No
+
+FIELD 7: AmountNeeded
+- Type: Number
+- Name: AmountNeeded (exactly as written, capital A and N)
+- Format: Integer
+- Allow negative numbers: No
+
+FIELD 8: Priority
+- Type: Single select
+- Name: Priority (exactly as written, capital P)
+- Options (add all 5):
+  1. none
+  2. low
+  3. medium
+  4. high
+  5. critical
+
+FIELD 9: SortOrder
+- Type: Number
+- Name: SortOrder (exactly as written, capital S and O)
+- Format: Integer
+- Allow negative numbers: Yes (CHECK THIS BOX)
+
+Please guide me step-by-step through creating each of these fields in Airtable. For each field:
+1. Tell me where to click
+2. What to select
+3. What to type
+4. Verify I did it correctly before moving to the next field
+
+Start with Field 1 (PartNumber) and guide me through the process.
+
+
+═══════════════════════════════════════════════════════════════
