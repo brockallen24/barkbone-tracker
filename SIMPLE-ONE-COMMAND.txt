@@ -1,0 +1,64 @@
+╔═══════════════════════════════════════════════════════════════╗
+║              📁 SINGLE COMMAND - COPY FILE NOW               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+STEP 1: Open Windows PowerShell as Administrator
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Press Windows Key
+2. Type: powershell
+3. RIGHT-CLICK on "Windows PowerShell"
+4. Click "Run as Administrator"
+5. Click "Yes" if prompted
+
+
+STEP 2: Copy and Paste This ONE Command
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Copy everything between the lines below:
+
+─────────────────────────────────────────────────────────────
+
+wsl -e cat /home/user/barkbone-tracker/Barkbone-Tracker-Deploy.html | Out-File -FilePath "$env:USERPROFILE\Downloads\Barkbone-Tracker-Deploy.html" -Encoding UTF8
+
+─────────────────────────────────────────────────────────────
+
+
+STEP 3: Press Enter and Wait
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The command will run for 2-3 seconds. When you see the prompt again,
+the file has been copied!
+
+
+STEP 4: Find Your File
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Open File Explorer (Windows Key + E)
+2. Click on "Downloads" in the left sidebar
+3. Look for: Barkbone-Tracker-Deploy.html
+4. Size should be about 69 KB
+
+
+STEP 5: Deploy to Netlify
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Open your web browser
+2. Go to: https://app.netlify.com/drop
+3. Drag Barkbone-Tracker-Deploy.html from your Downloads folder
+4. Drop it on the Netlify page
+5. Wait 10 seconds - your site will be live! 🎉
+
+
+TROUBLESHOOTING:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If you get an error about WSL not being recognized:
+- You may need to install WSL first
+- Open PowerShell as Admin and run: wsl --install
+
+If the file doesn't appear in Downloads:
+- Check if PowerShell gave any error messages
+- Make sure you ran PowerShell as Administrator
+
+╚═══════════════════════════════════════════════════════════════╝
