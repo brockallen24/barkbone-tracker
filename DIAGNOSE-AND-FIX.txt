@@ -1,0 +1,118 @@
+╔═══════════════════════════════════════════════════════════════╗
+║     🔍 DIAGNOSE THE PROBLEM - WHY IS IT SHOWING AS TEXT?    ║
+╚═══════════════════════════════════════════════════════════════╝
+
+The file is showing as TEXT instead of rendering as a webpage.
+Let's figure out why and fix it.
+
+
+STEP 1: CHECK THE FILE EXTENSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The file might be saved as .txt instead of .html!
+
+1. Open File Explorer
+2. Go to your Downloads folder
+3. Click on "View" at the top
+4. Check the box for "File name extensions"
+5. Look at the file - does it say:
+   - Barkbone-Tracker-Deploy-FIXED.html ✅ GOOD
+   - Barkbone-Tracker-Deploy-FIXED.html.txt ❌ BAD
+   - Barkbone-Tracker-Deploy-FIXED.txt ❌ BAD
+
+If it has .txt at the end:
+- Right-click the file
+- Select "Rename"
+- Change the name to: Barkbone-Tracker-Deploy-FIXED.html
+- Click Yes when it asks if you're sure
+
+
+STEP 2: CHECK WHAT PROGRAM IS OPENING IT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The file might be opening in Notepad instead of a browser!
+
+1. Find the HTML file in Downloads
+2. RIGHT-CLICK on it (don't double-click yet)
+3. Look at "Open with" option
+4. Do you see:
+   - Google Chrome ✅ GOOD
+   - Microsoft Edge ✅ GOOD
+   - Notepad ❌ BAD
+   - Visual Studio Code ❌ BAD
+
+To fix:
+- Right-click the file
+- Select "Open with" → "Choose another app"
+- Select "Google Chrome" or "Microsoft Edge"
+- Check the box "Always use this app to open .html files"
+- Click OK
+
+
+STEP 3: DOWNLOAD THE FILE THE CORRECT WAY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use this NEW METHOD - Open PowerShell and run these commands ONE AT A TIME:
+
+1. First, go to your home directory:
+
+cd ~
+
+2. Then download the file with correct settings:
+
+wsl.exe cat /home/user/barkbone-tracker/Barkbone-Tracker-Deploy-FIXED.html | Set-Content -Path ".\Downloads\BarkboneTracker.html" -Encoding UTF8
+
+3. Verify it downloaded:
+
+Get-Item ".\Downloads\BarkboneTracker.html"
+
+4. Now try to open it in Chrome specifically:
+
+Start-Process chrome.exe ".\Downloads\BarkboneTracker.html"
+
+
+STEP 4: TRY THE SIMPLE TEST FILE FIRST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Let's test with a tiny HTML file to see if the problem is the download
+method or the file itself.
+
+In PowerShell, run:
+
+wsl.exe cat /home/user/barkbone-tracker/test-simple.html | Set-Content -Path ".\Downloads\test.html" -Encoding UTF8
+
+Then open test.html from your Downloads folder.
+
+If you see a PURPLE page with white text saying "SUCCESS!", then the
+download method works and the problem is with the main HTML file.
+
+If you see HTML CODE as text, then the problem is the download method
+or file associations.
+
+
+STEP 5: CHECK FOR INTERNET EXPLORER MODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Windows might be opening HTML files in Internet Explorer mode!
+
+Try this:
+1. Right-click the HTML file
+2. Select "Open with" → "Google Chrome" (or Edge)
+3. In the browser, press F12 to open Developer Tools
+4. Look for any errors in the Console tab
+5. Tell me what errors you see (if any)
+
+
+TELL ME WHAT YOU FIND:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After trying these steps, tell me:
+
+1. What is the file extension? (.html or .txt?)
+2. What program is set to open .html files? (Chrome/Edge or Notepad?)
+3. Did the test-simple.html file show as purple or as text?
+4. Are there any errors in the browser console (F12)?
+
+This will help me figure out exactly what's wrong!
+
+╚═══════════════════════════════════════════════════════════════╝
