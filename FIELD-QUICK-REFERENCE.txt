@@ -1,0 +1,53 @@
+╔═══════════════════════════════════════════════════════════════╗
+║          📋 QUICK REFERENCE - COPY THIS!                     ║
+╚═══════════════════════════════════════════════════════════════╝
+
+Keep this open while you create fields in Airtable.
+
+
+FIELD NAME          | FIELD TYPE        | SPECIAL SETTINGS
+════════════════════|═══════════════════|════════════════════════
+PartNumber          | Single line text  | (none)
+Description         | Long text         | (none)
+OpenPO              | Number            | Integer, no negatives
+BoxSize             | Single line text  | (none)
+CasePack            | Number            | Integer, no negatives
+BackerStock         | Number            | Integer, no negatives
+AmountNeeded        | Number            | Integer, no negatives
+Priority            | Single select     | Options: none, low, medium, high, critical
+SortOrder           | Number            | Integer, ALLOW negatives
+
+
+COPY THESE FIELD NAMES EXACTLY (case-sensitive):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PartNumber
+Description
+OpenPO
+BoxSize
+CasePack
+BackerStock
+AmountNeeded
+Priority
+SortOrder
+
+
+PRIORITY OPTIONS (for Single select field):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+none
+low
+medium
+high
+critical
+
+
+AFTER CREATING ALL 9 FIELDS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Go to your Netlify site
+2. Refresh the page (F5)
+3. Click "Add New Product" to test
+4. Done! 🎉
+
+╚═══════════════════════════════════════════════════════════════╝

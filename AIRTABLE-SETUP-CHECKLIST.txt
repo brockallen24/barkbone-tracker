@@ -1,0 +1,171 @@
+╔═══════════════════════════════════════════════════════════════╗
+║     ✅ AIRTABLE FIELD SETUP CHECKLIST                        ║
+║     Follow this step-by-step to create all required fields   ║
+╚═══════════════════════════════════════════════════════════════╝
+
+PREPARATION:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Go to: https://airtable.com
+2. Log in to your account
+3. Open your base: app79OgMIUBu9sCpq
+4. Open the table: tbl0w2qfQMtTI7fwh
+
+
+FIELD 1: PartNumber
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ Click the "+" button at the end of your columns
+☐ Select: "Single line text"
+☐ In the "Name" field, type exactly: PartNumber
+☐ Click "Create field"
+☐ VERIFY: Column header shows "PartNumber" (capital P and N)
+
+
+FIELD 2: Description
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ Click the "+" button
+☐ Select: "Long text"
+☐ Name: Description
+☐ Click "Create field"
+☐ VERIFY: Column header shows "Description" (capital D)
+
+
+FIELD 3: OpenPO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ Click the "+" button
+☐ Select: "Number"
+☐ Name: OpenPO
+☐ Format: Integer (default)
+☐ Precision: 0 (whole numbers)
+☐ Allow negative numbers: Leave UNCHECKED
+☐ Click "Create field"
+☐ VERIFY: Column header shows "OpenPO" (capital O, P, O)
+
+
+FIELD 4: BoxSize
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ Click the "+" button
+☐ Select: "Single line text"
+☐ Name: BoxSize
+☐ Click "Create field"
+☐ VERIFY: Column header shows "BoxSize" (capital B and S)
+
+
+FIELD 5: CasePack
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ Click the "+" button
+☐ Select: "Number"
+☐ Name: CasePack
+☐ Format: Integer
+☐ Precision: 0
+☐ Allow negative numbers: Leave UNCHECKED
+☐ Click "Create field"
+☐ VERIFY: Column header shows "CasePack" (capital C and P)
+
+
+FIELD 6: BackerStock
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ Click the "+" button
+☐ Select: "Number"
+☐ Name: BackerStock
+☐ Format: Integer
+☐ Precision: 0
+☐ Allow negative numbers: Leave UNCHECKED
+☐ Click "Create field"
+☐ VERIFY: Column header shows "BackerStock" (capital B and S)
+
+
+FIELD 7: AmountNeeded
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ Click the "+" button
+☐ Select: "Number"
+☐ Name: AmountNeeded
+☐ Format: Integer
+☐ Precision: 0
+☐ Allow negative numbers: Leave UNCHECKED
+☐ Click "Create field"
+☐ VERIFY: Column header shows "AmountNeeded" (capital A and N)
+
+
+FIELD 8: Priority
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ Click the "+" button
+☐ Select: "Single select"
+☐ Name: Priority
+☐ Add these options (type each and press Enter after each):
+   ☐ none
+   ☐ low
+   ☐ medium
+   ☐ high
+   ☐ critical
+☐ Click "Create field"
+☐ VERIFY: Column header shows "Priority" (capital P)
+☐ VERIFY: When you click the dropdown, you see all 5 options
+
+
+FIELD 9: SortOrder
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ Click the "+" button
+☐ Select: "Number"
+☐ Name: SortOrder
+☐ Format: Integer
+☐ Precision: 0
+☐ Allow negative numbers: CHECK THIS BOX (allow negative)
+☐ Click "Create field"
+☐ VERIFY: Column header shows "SortOrder" (capital S and O)
+
+
+FINAL VERIFICATION:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ Count your columns - you should have 9 new fields (plus any existing)
+☐ Check each column header matches EXACTLY:
+   ☐ PartNumber
+   ☐ Description
+   ☐ OpenPO
+   ☐ BoxSize
+   ☐ CasePack
+   ☐ BackerStock
+   ☐ AmountNeeded
+   ☐ Priority
+   ☐ SortOrder
+
+
+TEST YOUR APP:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ Go to your Netlify site
+☐ Press F5 to refresh the page
+☐ The "Connection Error" should be gone!
+☐ Click "Add New Product" button
+☐ Fill out the form and click "Add Product"
+☐ Your product should appear in the list!
+
+
+COMMON MISTAKES TO AVOID:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ Don't use spaces: "Part Number" is WRONG
+✅ Use camelCase: "PartNumber" is CORRECT
+
+❌ Don't use lowercase: "partnumber" is WRONG
+✅ Match the capitals: "PartNumber" is CORRECT
+
+❌ Don't abbreviate: "Amt" is WRONG
+✅ Use full name: "AmountNeeded" is CORRECT
+
+
+ESTIMATED TIME: 10-15 minutes
+
+Once you've completed all fields, your inventory tracker will work!
+
+╚═══════════════════════════════════════════════════════════════╝
