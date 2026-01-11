@@ -1,0 +1,51 @@
+╔═══════════════════════════════════════════════════════════════╗
+║          📁 COPY FILE TO WINDOWS - SIMPLE METHOD             ║
+╚═══════════════════════════════════════════════════════════════╝
+
+STEP 1: Open Windows PowerShell
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Press Windows Key + R
+2. Type: powershell
+3. Press Enter
+
+
+STEP 2: Copy this ENTIRE command and paste it into PowerShell
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+wsl cp /home/user/barkbone-tracker/Barkbone-Tracker-Deploy.html /mnt/c/Users/$env:USERNAME/Downloads/Barkbone-Tracker-Deploy.html
+
+
+STEP 3: Press Enter
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The file will copy to your Downloads folder!
+
+
+STEP 4: Check Your Downloads Folder
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Open File Explorer
+2. Go to Downloads
+3. Look for: Barkbone-Tracker-Deploy.html (69 KB)
+
+
+STEP 5: Deploy to Netlify
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Go to: https://app.netlify.com/drop
+2. Drag Barkbone-Tracker-Deploy.html to the page
+3. Get your live URL! 🎉
+
+
+ALTERNATIVE IF ABOVE DOESN'T WORK:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+In PowerShell, try this command instead:
+
+wsl cat /home/user/barkbone-tracker/Barkbone-Tracker-Deploy.html > $env:USERPROFILE\Downloads\Barkbone-Tracker-Deploy.html
+
+
+This reads the file from WSL and saves it to your Downloads folder.
+
+╚═══════════════════════════════════════════════════════════════╝
