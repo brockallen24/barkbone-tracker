@@ -1,0 +1,98 @@
+╔═══════════════════════════════════════════════════════════════╗
+║       🔧 CORRECTED POWERSHELL COMMAND - PROPER ENCODING      ║
+╚═══════════════════════════════════════════════════════════════╝
+
+THE PROBLEM:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The previous command was using wrong encoding, causing the HTML file
+to display as plain text instead of rendering as a webpage.
+
+
+THE SOLUTION - USE THIS NEW POWERSHELL COMMAND:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1: Open Windows PowerShell
+(Search "PowerShell" in Start menu, right-click, "Run as Administrator")
+
+
+STEP 2: Copy and paste THIS ENTIRE COMMAND:
+
+$content = wsl -e cat /home/user/barkbone-tracker/Barkbone-Tracker-Deploy-FIXED.html; [System.IO.File]::WriteAllLines("$env:USERPROFILE\Downloads\Barkbone-Tracker-Deploy-FIXED.html", $content, [System.Text.UTF8Encoding]::new($false))
+
+
+STEP 3: Press Enter
+
+
+STEP 4: Verify the download:
+
+dir $env:USERPROFILE\Downloads\Barkbone-Tracker-Deploy-FIXED.html
+
+
+WHAT THIS COMMAND DOES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+- Reads the HTML file from WSL
+- Saves it with UTF-8 encoding WITHOUT BOM (Byte Order Mark)
+- Preserves the proper HTML format so browsers can render it correctly
+
+
+ALTERNATIVE METHOD - IF THE ABOVE DOESN'T WORK:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Try this simpler command:
+
+wsl.exe bash -c "cat /home/user/barkbone-tracker/Barkbone-Tracker-Deploy-FIXED.html" > $env:USERPROFILE\Downloads\Barkbone-Tracker.html
+
+
+Then open: Barkbone-Tracker.html from your Downloads folder
+
+
+TEST THE FILE AFTER DOWNLOAD:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Open File Explorer
+2. Go to Downloads folder
+3. Find the HTML file (about 69 KB)
+4. RIGHT-CLICK on the file
+5. Select "Open with" > Google Chrome (or Microsoft Edge)
+
+WHAT YOU SHOULD SEE:
+- Purple gradient background
+- "Inventory Tracker" title at top
+- Stats showing "Total Products: 0"
+- Buttons: "Add New Product", "Refresh", etc.
+- Status indicator: "Connected to Cloud"
+
+WHAT YOU SHOULD NOT SEE:
+- Plain text with HTML tags like <html>, <body>, <script>
+- Code displayed as text
+- No styling or colors
+
+
+IF YOU STILL SEE PLAIN TEXT:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The file might be opening in a text editor instead of a browser.
+
+Try this:
+1. Right-click the HTML file in Downloads
+2. Select "Properties"
+3. Look at "Opens with:" - it should say "Google Chrome" or "Microsoft Edge"
+4. If it says "Notepad" or "Visual Studio Code":
+   - Click "Change..."
+   - Select "Google Chrome" or "Microsoft Edge"
+   - Click OK
+5. Double-click the file to open it again
+
+
+STILL NOT WORKING?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Let me know and I'll create a different method to transfer the file,
+such as:
+- Creating a temporary web server you can access from Windows browser
+- Base64 encoding the file so you can copy/paste it
+- Using a different file transfer method
+
+╚═══════════════════════════════════════════════════════════════╝

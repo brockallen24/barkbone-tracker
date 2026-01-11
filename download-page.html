@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Barkbone Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 50px;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+        }
+
+        p {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 20px 50px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.3em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(72, 187, 120, 0.4);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(72, 187, 120, 0.6);
+        }
+
+        .file-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            color: #555;
+        }
+
+        .instructions {
+            margin-top: 40px;
+            text-align: left;
+            background: #fef3c7;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid #f59e0b;
+        }
+
+        .instructions h3 {
+            color: #92400e;
+            margin-bottom: 15px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            color: #92400e;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .netlify-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 15px 30px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .netlify-link:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">📦</div>
+        <h1>Barkbone Tracker</h1>
+        <p>Your inventory tracking application is ready to download!</p>
+
+        <a href="Barkbone-Tracker-Deploy-FIXED.html" download="Barkbone-Tracker-Deploy-FIXED.html" class="download-btn">
+            ⬇️ DOWNLOAD FILE
+        </a>
+
+        <div class="file-info">
+            <strong>File Name:</strong> Barkbone-Tracker-Deploy-FIXED.html<br>
+            <strong>File Size:</strong> 70 KB<br>
+            <strong>Status:</strong> ✅ Ready for Deployment
+        </div>
+
+        <div class="instructions">
+            <h3>📋 After Downloading:</h3>
+            <ol>
+                <li><strong>Find the file</strong> in your Downloads folder</li>
+                <li><strong>Right-click</strong> on it and select "Open with" → Chrome or Edge</li>
+                <li><strong>Test it works</strong> - you should see a purple background with "Inventory Tracker"</li>
+                <li><strong>Deploy to Netlify:</strong></li>
+            </ol>
+            <a href="https://app.netlify.com/drop" target="_blank" class="netlify-link">
+                🚀 Go to Netlify Drop
+            </a>
+        </div>
+    </div>
+</body>
+</html>
