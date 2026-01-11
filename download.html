@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Download Your Netlify File</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            text-align: center;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+        .download-btn {
+            display: inline-block;
+            padding: 20px 50px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: 600;
+            box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(72, 187, 120, 0.4);
+        }
+        .filename {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 30px 0;
+            font-family: monospace;
+            color: #2d3748;
+        }
+        .steps {
+            text-align: left;
+            background: #edf2f7;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        .steps h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        .steps ol {
+            padding-left: 20px;
+        }
+        .steps li {
+            margin: 10px 0;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">📦</div>
+        <h1>Your File is Ready!</h1>
+        <p>Click the button below to download</p>
+
+        <a href="Barkbone-Tracker-Deploy.html" download="Barkbone-Tracker-Deploy.html" class="download-btn">
+            ⬇️ DOWNLOAD FILE
+        </a>
+
+        <div class="filename">
+            <strong>File name:</strong> Barkbone-Tracker-Deploy.html<br>
+            <strong>File size:</strong> 69 KB
+        </div>
+
+        <div class="steps">
+            <h3>📋 After downloading:</h3>
+            <ol>
+                <li>Find the file in your <strong>Downloads</strong> folder</li>
+                <li>It will be named: <strong>Barkbone-Tracker-Deploy.html</strong></li>
+                <li>Open <a href="https://app.netlify.com/drop" target="_blank">https://app.netlify.com/drop</a></li>
+                <li>Drag the file to Netlify</li>
+                <li>Wait 10 seconds - get your URL!</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>
