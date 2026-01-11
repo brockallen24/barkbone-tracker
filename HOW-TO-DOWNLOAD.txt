@@ -1,0 +1,79 @@
+╔═══════════════════════════════════════════════════════════════╗
+║     ✅ DOWNLOAD FROM GITHUB - 4 SIMPLE STEPS!                ║
+╚═══════════════════════════════════════════════════════════════╝
+
+
+STEP 1: DOWNLOAD THE FILE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Open your web browser and go to this URL:
+
+https://raw.githubusercontent.com/brockallen24/barkbone-tracker/claude/review-data-connections-HdNdv/BarkboneTracker-Download.html
+
+The file will download to your Downloads folder.
+Save it as: BarkboneTracker.html
+
+
+STEP 2: ADD YOUR CREDENTIALS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The file has placeholders that need to be replaced.
+
+1. Find BarkboneTracker.html in Downloads
+
+2. RIGHT-CLICK → "Open with" → Notepad
+
+3. Find these lines (around line 716-720):
+
+   const AIRTABLE_CONFIG = {
+       baseId: 'YOUR_BASE_ID_HERE',
+       apiKey: 'YOUR_API_KEY_HERE',
+       tableId: 'YOUR_TABLE_ID_HERE'
+   };
+
+4. Replace with your actual Airtable credentials:
+   - Base ID: app79OgMIUBu9sCpq
+   - Table ID: tbl0w2qfQMtTI7fwh
+   - API Key: (the 81-character token starting with "pat...")
+
+5. Save the file (Ctrl+S) and close Notepad
+
+
+STEP 3: TEST IT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Find BarkboneTracker.html in Downloads
+
+2. RIGHT-CLICK → "Open with" → Chrome
+
+3. You should see:
+   ✅ Purple gradient background
+   ✅ "Inventory Tracker" title
+   ✅ Working buttons
+
+
+STEP 4: DEPLOY TO NETLIFY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Go to: https://app.netlify.com/drop
+
+2. Drag BarkboneTracker.html to the page
+
+3. Wait 10 seconds
+
+4. Get your live URL! 🎉
+
+
+TROUBLESHOOTING:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Issue: 404 Not Found on GitHub
+Fix: Make sure you're logged into GitHub with account: brockallen24
+
+Issue: File shows as text in Chrome
+Fix: Make sure you replaced ALL THREE placeholders in Step 2
+
+Issue: Connection Error in the app
+Fix: Double-check the API key was pasted correctly (all 81 characters)
+
+╚═══════════════════════════════════════════════════════════════╝
