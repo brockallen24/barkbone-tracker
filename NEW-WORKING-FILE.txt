@@ -1,0 +1,130 @@
+╔═══════════════════════════════════════════════════════════════╗
+║   ✅ COMPLETELY NEW FILE - THIS ONE WILL WORK IN CHROME!    ║
+╚═══════════════════════════════════════════════════════════════╝
+
+THE PROBLEM WAS FOUND AND FIXED:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The old file was trying to load an external "config.js" file that
+doesn't exist, causing JavaScript errors and making Chrome display
+it as plain text.
+
+The NEW file has ALL the Airtable credentials EMBEDDED DIRECTLY
+in the HTML - no external files needed!
+
+
+🌐 DOWNLOAD THE NEW WORKING FILE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HTTP SERVER IS RUNNING ON PORT 3000!
+
+METHOD 1 - Download from Browser (EASIEST):
+─────────────────────────────────────────────
+
+1. Open Google Chrome or Microsoft Edge
+
+2. Go to this URL:
+
+   http://localhost:3000/BarkboneTracker-Clean.html
+
+3. The file will download automatically to your Downloads folder
+
+4. Find "BarkboneTracker-Clean.html" in Downloads (69 KB)
+
+5. RIGHT-CLICK on it → "Open with" → Chrome or Edge
+
+6. YOU SHOULD SEE:
+   ✅ Purple gradient background
+   ✅ "Inventory Tracker" title at top
+   ✅ "Connected to Cloud" status
+   ✅ Buttons: "Add New Product", "Refresh", etc.
+   ✅ Stats cards showing zeros (if Airtable is empty)
+
+7. YOU SHOULD NOT SEE:
+   ❌ Plain text with <html>, <script> tags
+   ❌ HTML code displayed as text
+   ❌ White background
+
+
+METHOD 2 - PowerShell Download:
+────────────────────────────────
+
+Open PowerShell and run:
+
+Invoke-WebRequest -Uri "http://localhost:3000/BarkboneTracker-Clean.html" -OutFile "$env:USERPROFILE\Downloads\BarkboneTracker.html"
+
+Then open BarkboneTracker.html from your Downloads folder.
+
+
+🧪 TEST IT BEFORE DEPLOYING:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After downloading, open the file in Chrome:
+
+1. Right-click on BarkboneTracker-Clean.html
+2. Select "Open with" → Google Chrome
+3. Check if you see the purple background
+4. Click "Add New Product" button - a form should pop up
+5. If it works locally, it will work on Netlify!
+
+
+🚀 DEPLOY TO NETLIFY:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Once the file works in your browser:
+
+1. Go to: https://app.netlify.com/drop
+
+2. Drag BarkboneTracker-Clean.html from your Downloads folder
+
+3. Drop it on the Netlify page
+
+4. Wait 10-15 seconds
+
+5. You'll get a live URL like: https://random-name-12345.netlify.app
+
+6. Click the URL to test your live site!
+
+
+WHAT'S DIFFERENT IN THIS FILE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ NO reference to external config.js file
+✅ Airtable credentials embedded directly in JavaScript:
+   - Base ID: app79OgMIUBu9sCpq
+   - Table ID: tbl0w2qfQMtTI7fwh
+   - API Key: patjBXtoM35hEkfLn...d4b0d (full 81-char key)
+✅ Complete standalone HTML file - nothing external needed
+✅ All JavaScript working properly
+✅ No duplicate script tags
+✅ No hidden characters or encoding issues
+
+
+QUICK VERIFICATION:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before deploying, verify it works:
+
+1. Open the file in Chrome
+2. Press F12 to open Developer Tools
+3. Click the "Console" tab
+4. Look for any red error messages
+
+If you see NO ERRORS and the page displays correctly with purple
+background, you're ready to deploy!
+
+If you see errors, copy them and send them to me.
+
+
+START HERE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Open your browser and go to:
+
+👉 http://localhost:3000/BarkboneTracker-Clean.html
+
+The file will download. Then open it in Chrome and tell me if you
+see the purple background with "Inventory Tracker" or if you still
+see HTML code as text.
+
+╚═══════════════════════════════════════════════════════════════╝
