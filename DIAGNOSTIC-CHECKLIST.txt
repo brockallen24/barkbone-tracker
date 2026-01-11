@@ -1,0 +1,94 @@
+╔═══════════════════════════════════════════════════════════════╗
+║     🔍 DIAGNOSTIC CHECKLIST - PLEASE PROVIDE THIS INFO       ║
+╚═══════════════════════════════════════════════════════════════╝
+
+To help diagnose the issue, I need you to check a few things:
+
+
+STEP 1: CHECK BROWSER CONSOLE FOR EXACT ERROR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Go to your Netlify site
+2. Press F12 to open Developer Tools
+3. Click the "Console" tab
+4. Look for RED error messages
+
+TELL ME: What is the EXACT error message you see?
+
+Common errors and what they mean:
+- "401 Unauthorized" = API key is wrong
+- "404 Not Found" = Base ID or Table ID is wrong
+- "INVALID_REQUEST_UNKNOWN" = Field names don't match
+- "UNKNOWN_FIELD_NAME" = Specific field is missing or misspelled
+
+
+STEP 2: VERIFY YOUR CREDENTIALS IN THE UPLOADED FILE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Did you replace ALL THREE placeholders in the index.html file?
+
+Check:
+☐ baseId: Should be 'app79OgMIUBu9sCpq'
+☐ tableId: Should be 'tbl0w2qfQMtTI7fwh'
+☐ apiKey: Should be 'pat...' (81 characters total)
+
+To verify:
+1. Go to your Downloads folder
+2. Find the index.html file you uploaded to Netlify
+3. Right-click → Open with → Notepad
+4. Find the AIRTABLE_CONFIG section
+5. Make sure none of them say "YOUR_BASE_ID_HERE" or "YOUR_API_KEY_HERE"
+
+
+STEP 3: VERIFY AIRTABLE FIELD NAMES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Go to your Airtable base and check the column headers.
+
+They should be EXACTLY (case-sensitive):
+☐ PartNumber
+☐ Description
+☐ OpenPO
+☐ BoxSize
+☐ CasePack
+☐ BackerStock
+☐ AmountNeeded
+☐ Priority
+☐ SortOrder
+
+TELL ME: Do all your field names match exactly?
+If not, which ones are different?
+
+
+STEP 4: CHECK YOUR NETLIFY URL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TELL ME: What is your Netlify site URL?
+(Example: https://something-12345.netlify.app)
+
+
+STEP 5: CHECK WHAT THE ERROR SAYS ON THE PAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When you load your Netlify site, what do you see?
+
+Option A: "Connection Error" in red at top
+Option B: "Total Products: 0" with no error
+Option C: Page loads but data doesn't show
+Option D: Different error message
+
+TELL ME: Which option describes what you see?
+
+
+PLEASE PROVIDE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. The exact error message from Console (F12)
+2. Confirmation that you replaced all 3 placeholders
+3. List of your Airtable field names
+4. Your Netlify URL
+5. Which error option (A, B, C, or D) you see
+
+Once I have this information, I can pinpoint exactly what's wrong!
+
+╚═══════════════════════════════════════════════════════════════╝
