@@ -1,0 +1,168 @@
+╔═══════════════════════════════════════════════════════════════╗
+║        🔍 LET'S DIAGNOSE WHY CHROME SHOWS TEXT               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+FILES KEEP SHOWING AS TEXT - LET'S FIND OUT WHY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+STEP 1: TEST WITH A TINY FILE FIRST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Open PowerShell and run:
+
+wsl cat /home/user/barkbone-tracker/test-tiny.html > $env:USERPROFILE\Downloads\test.html; Start-Process chrome.exe "$env:USERPROFILE\Downloads\test.html"
+
+This will download a tiny test file and open it in Chrome.
+
+WHAT DO YOU SEE?
+
+Option A: PURPLE background with "SUCCESS!" in large white text
+   → The download method WORKS! The problem is with the main HTML file.
+   → Go to SOLUTION A below
+
+Option B: HTML code as plain text (you see <html>, <body> tags)
+   → The download method has an encoding issue
+   → Go to SOLUTION B below
+
+
+═══════════════════════════════════════════════════════════════
+
+SOLUTION A: Download Method Works, Main File Has Issues
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The main HTML file might be too large or have a syntax error.
+
+Try this - Open PowerShell and run this command:
+
+wsl cat /home/user/barkbone-tracker/BarkboneTracker-Clean.html > $env:USERPROFILE\Downloads\Tracker.html
+
+Then:
+1. Open File Explorer
+2. Go to Downloads
+3. Find "Tracker.html" (should be about 69 KB)
+4. RIGHT-CLICK on it → Properties
+5. At the bottom, if you see "This file came from another computer...", click "Unblock"
+6. Click Apply, then OK
+7. Now RIGHT-CLICK → Open with → Chrome
+
+Does it work now?
+
+
+═══════════════════════════════════════════════════════════════
+
+SOLUTION B: Download Method Has Encoding Issues
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Even the tiny file shows as text. This means Windows PowerShell
+redirect (>) is corrupting the HTML.
+
+METHOD 1 - Use Notepad to Create the File:
+
+1. Open Notepad (search "Notepad" in Start menu)
+
+2. In PowerShell, run:
+   wsl cat /home/user/barkbone-tracker/BarkboneTracker-Clean.html
+
+3. This will display all the HTML code in PowerShell
+
+4. SELECT ALL the code (it will be a lot of text)
+
+5. RIGHT-CLICK to copy it
+
+6. PASTE into Notepad
+
+7. In Notepad: File → Save As
+   - File name: BarkboneTracker.html
+   - Save as type: All Files (*)
+   - Encoding: UTF-8
+   - Save location: Downloads folder
+
+8. Close Notepad
+
+9. Open Downloads folder
+
+10. RIGHT-CLICK on BarkboneTracker.html → Open with → Chrome
+
+
+METHOD 2 - Use Visual Studio Code (if you have it):
+
+1. Open VS Code
+
+2. Create New File (Ctrl+N)
+
+3. In PowerShell, run:
+   wsl cat /home/user/barkbone-tracker/BarkboneTracker-Clean.html | clip
+
+4. This copies the HTML to your clipboard
+
+5. In VS Code, paste the content (Ctrl+V)
+
+6. File → Save As → BarkboneTracker.html (save to Downloads)
+
+7. Open the file in Chrome
+
+
+METHOD 3 - Create File Directly in Windows:
+
+If you don't have WSL access or it's not working:
+
+1. Go to the GitHub repository in your web browser:
+   https://github.com/brockallen24/barkbone-tracker
+
+2. Navigate to the branch: claude/review-data-connections-HdNdv
+
+3. I can commit a special version without credentials for you to download
+
+4. Let me know if you want me to do this
+
+
+═══════════════════════════════════════════════════════════════
+
+SOLUTION C: Use Windows Command Prompt Instead
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PowerShell might be causing the issue. Try Command Prompt:
+
+1. Open Command Prompt (search "cmd" in Start menu)
+
+2. Run:
+   wsl cat /home/user/barkbone-tracker/BarkboneTracker-Clean.html > %USERPROFILE%\Downloads\Tracker.html
+
+3. Then run:
+   start chrome "%USERPROFILE%\Downloads\Tracker.html"
+
+
+═══════════════════════════════════════════════════════════════
+
+EMERGENCY SOLUTION: I'll Email You the File
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If NOTHING works, I can:
+
+1. Create a GitHub Gist with the HTML file
+2. Create a temporary download link
+3. Split the file into parts you can combine
+4. Create a .zip file you can extract
+
+Let me know which you prefer.
+
+
+═══════════════════════════════════════════════════════════════
+
+IMPORTANT QUESTION:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When you open the HTML file in Chrome and see text instead of a
+webpage, can you:
+
+1. Press F12 to open Developer Tools
+2. Click on the "Console" tab
+3. Tell me if you see any RED error messages
+
+This will help me understand what's going wrong!
+
+
+START HERE: Run the tiny test first (STEP 1 at the top)
+
+╚═══════════════════════════════════════════════════════════════╝
