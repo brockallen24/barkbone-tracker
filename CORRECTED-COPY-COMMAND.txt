@@ -1,0 +1,60 @@
+╔═══════════════════════════════════════════════════════════════╗
+║          📁 CORRECTED COPY COMMAND FOR POWERSHELL            ║
+╚═══════════════════════════════════════════════════════════════╝
+
+STEP 1: Open Windows PowerShell
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Press Windows Key + R
+2. Type: powershell
+3. Press Enter
+
+
+STEP 2: Copy THIS EXACT command (corrected syntax)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+wsl.exe bash -c "cat /home/user/barkbone-tracker/Barkbone-Tracker-Deploy.html" > $env:USERPROFILE\Downloads\Barkbone-Tracker-Deploy.html
+
+
+STEP 3: Press Enter
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Wait 2-3 seconds for the file to copy.
+
+
+STEP 4: Verify the file was copied
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+In PowerShell, type this command to check:
+
+dir $env:USERPROFILE\Downloads\Barkbone-Tracker-Deploy.html
+
+
+STEP 5: Check Your Downloads Folder
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Open File Explorer
+2. Go to Downloads
+3. Look for: Barkbone-Tracker-Deploy.html (should be about 69 KB)
+
+
+STEP 6: Deploy to Netlify
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Go to: https://app.netlify.com/drop
+2. Drag Barkbone-Tracker-Deploy.html to the page
+3. Wait 10 seconds
+4. Get your live URL! 🎉
+
+
+WHAT THIS COMMAND DOES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+- wsl.exe = Runs a command in Windows Subsystem for Linux
+- bash -c "cat ..." = Uses Linux bash to read the file
+- > $env:USERPROFILE\Downloads\ = Saves output to your Downloads folder
+
+This will copy the 69 KB HTML file from the Linux environment directly
+to your Windows Downloads folder!
+
+╚═══════════════════════════════════════════════════════════════╝
