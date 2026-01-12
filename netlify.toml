@@ -1,11 +1,12 @@
 [build]
-command = "echo 'PHP project - no build needed'"
+command = "echo 'PHP project ready'"
 publish = "."
 
-[build.environment]
-PHP_VERSION = "8.1"
+[functions]
+directory = "netlify/functions"
 
 [[redirects]]
-from = "/config.js"
-to = "/config.js"
+from = "/*"
+to = "/index.php"
 status = 200
+force = false
