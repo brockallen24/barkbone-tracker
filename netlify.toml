@@ -1,0 +1,11 @@
+[build]
+command = "echo 'PHP project - no build needed'"
+publish = "."
+
+[build.environment]
+PHP_VERSION = "8.1"
+
+[[redirects]]
+from = "/config.js"
+to = "/config.js"
+status = 200
