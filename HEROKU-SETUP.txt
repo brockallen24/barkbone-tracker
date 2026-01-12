@@ -1,0 +1,168 @@
+╔═══════════════════════════════════════════════════════════════╗
+║   🔧 HEROKU CONFIGURATION SETUP - COMPLETE GUIDE             ║
+╚═══════════════════════════════════════════════════════════════╝
+
+HEROKU SETUP VERIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Your app is configured to use Heroku. The setup works like this:
+
+1. index.php generates config.js from environment variables
+2. index.html loads config.js
+3. The app connects to Airtable using those credentials
+
+CRITICAL: You MUST set 3 Config Vars in Heroku for this to work!
+
+
+STEP 1: SET HEROKU CONFIG VARS (ENVIRONMENT VARIABLES)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+METHOD A - Via Heroku Dashboard (EASIEST):
+
+1. Go to: https://dashboard.heroku.com/
+
+2. Click on your app name
+
+3. Click on "Settings" tab
+
+4. Scroll down to "Config Vars" section
+
+5. Click "Reveal Config Vars"
+
+6. Add these THREE config vars by clicking "Add":
+
+   KEY: AIRTABLE_BASE_ID
+   VALUE: app79OgMIUBu9sCpq
+
+   KEY: AIRTABLE_TABLE_ID
+   VALUE: tbl0w2qfQMtTI7fwh
+
+   KEY: AIRTABLE_API_KEY
+   VALUE: [Your Personal Access Token - starts with "pat..."]
+
+7. Click "Add" after each one
+
+8. Verify all 3 are shown in the Config Vars list
+
+
+METHOD B - Via Heroku CLI:
+
+If you have Heroku CLI installed, run these commands:
+
+heroku config:set AIRTABLE_BASE_ID=app79OgMIUBu9sCpq
+heroku config:set AIRTABLE_TABLE_ID=tbl0w2qfQMtTI7fwh
+heroku config:set AIRTABLE_API_KEY=your_api_key_here
+
+Replace "your_api_key_here" with your actual API token.
+
+
+STEP 2: VERIFY CONFIG VARS ARE SET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Method A - Dashboard:
+1. In Heroku Dashboard → Settings → Config Vars
+2. You should see all 3 variables listed
+
+Method B - CLI:
+Run: heroku config
+
+You should see:
+AIRTABLE_API_KEY:  pat...
+AIRTABLE_BASE_ID:  app79OgMIUBu9sCpq
+AIRTABLE_TABLE_ID: tbl0w2qfQMtTI7fwh
+
+
+STEP 3: TEST THE CONFIG.JS ENDPOINT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After setting Config Vars:
+
+1. Open your Heroku app URL in browser
+
+2. Add /config.js to the end of the URL
+   Example: https://your-app-name.herokuapp.com/config.js
+
+3. You should see JavaScript output like:
+
+   const AIRTABLE_CONFIG = {
+     baseId: 'app79OgMIUBu9sCpq',
+     apiKey: 'pat...',
+     tableId: 'tbl0w2qfQMtTI7fwh'
+   };
+
+4. If you see this with real values (not empty), it's working!
+
+
+STEP 4: CHECK FOR COMMON ISSUES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Issue: /config.js shows empty values
+Fix: Config Vars not set properly in Heroku - go back to Step 1
+
+Issue: 401 Unauthorized error
+Fix: API key is wrong or expired - create a new one at:
+     https://airtable.com/create/tokens
+
+Issue: 404 Not Found error
+Fix: Base ID or Table ID is wrong - verify in your Airtable URL
+
+Issue: UNKNOWN_FIELD_NAME error
+Fix: Field names in Airtable don't match exactly - check spelling/capitals
+
+
+STEP 5: VERIFY DEPLOYMENT FILES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Make sure these files are deployed to Heroku:
+
+☐ index.php (generates config.js)
+☐ index.html (main app file)
+☐ Procfile (tells Heroku to use PHP/Apache)
+
+To check, run:
+heroku run ls
+
+You should see all three files listed.
+
+
+STEP 6: CHECK HEROKU LOGS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+To see what's happening:
+
+heroku logs --tail
+
+Look for any error messages. Common issues:
+- PHP errors
+- Missing files
+- Environment variable issues
+
+
+QUICK CHECKLIST:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ 3 Config Vars set in Heroku (AIRTABLE_BASE_ID, AIRTABLE_TABLE_ID, AIRTABLE_API_KEY)
+☐ /config.js endpoint shows real values (not empty)
+☐ Airtable fields created with exact names (PartNumber, Description, etc.)
+☐ API token has correct scopes (data.records:read, data.records:write)
+☐ API token has access to the base
+
+
+WHAT'S YOUR HEROKU APP URL?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tell me your Heroku URL so I can help you test it!
+
+Example: https://barkbone-tracker-12345.herokuapp.com
+
+
+NEXT STEPS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Set the 3 Config Vars in Heroku Dashboard (Step 1)
+2. Test /config.js endpoint (Step 3)
+3. Tell me the results
+
+Once Config Vars are set, your app should connect to Airtable!
+
+╚═══════════════════════════════════════════════════════════════╝
