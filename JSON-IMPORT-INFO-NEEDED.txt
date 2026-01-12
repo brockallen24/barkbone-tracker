@@ -1,0 +1,91 @@
+╔═══════════════════════════════════════════════════════════════╗
+║     📥 JSON FILE IMPORT - INFORMATION NEEDED                 ║
+╚═══════════════════════════════════════════════════════════════╝
+
+To help you import a JSON file into your inventory tracker, I need
+some information:
+
+
+QUESTIONS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Where is your JSON file located?
+   - On your computer
+   - On a server/URL
+   - In the GitHub repository
+
+2. What does the JSON structure look like?
+
+   Example Option A (Array of objects):
+   [
+     {
+       "partNumber": "ABC123",
+       "description": "Widget",
+       "openPO": 100,
+       "boxSize": "12x6x6",
+       ...
+     },
+     {
+       "partNumber": "DEF456",
+       ...
+     }
+   ]
+
+   Example Option B (Nested structure):
+   {
+     "products": [
+       { ... },
+       { ... }
+     ]
+   }
+
+3. What are the field names in your JSON?
+   (I need to map them to Airtable fields)
+
+4. How do you want to import it?
+   - Upload via a button on the web app
+   - Run a script to import it
+   - Paste the JSON content directly
+
+
+PLEASE PROVIDE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Share the JSON file or show me an example of its structure
+
+2. Tell me how you want to import it (web app button vs script)
+
+3. Let me know if the field names in JSON match the Airtable fields:
+   - PartNumber
+   - Description
+   - OpenPO
+   - BoxSize
+   - CasePack
+   - BackerStock
+   - AmountNeeded
+   - Priority
+   - SortOrder
+
+
+WHAT I CAN BUILD FOR YOU:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Option 1: File Upload Button
+- Add "Import JSON" button to the app
+- User selects JSON file from computer
+- App parses and uploads to Airtable
+- Shows progress and results
+
+Option 2: Bulk Import Script
+- You provide the JSON file
+- I create a script to import it
+- Runs once to populate Airtable
+
+Option 3: URL Import
+- Provide a URL to the JSON file
+- App fetches and imports automatically
+
+
+Which option would you prefer?
+
+╚═══════════════════════════════════════════════════════════════╝
