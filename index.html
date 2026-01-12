@@ -572,6 +572,7 @@
                 <button class="btn btn-secondary" onclick="refreshData()">🔄 Refresh</button>
                 <button class="btn btn-secondary" onclick="openInventoryModal()">📥 Receive Inventory</button>
                 <button class="btn btn-secondary" onclick="openShipmentModal()">📤 Process Shipment</button>
+                <button class="btn btn-secondary" onclick="openImportModal()">📂 Import JSON</button>
                 <button class="btn btn-secondary" onclick="generatePDF()">📄 Export PDF</button>
             </div>
             <div>
@@ -703,6 +704,34 @@
                     <input type="date" id="shipmentDate">
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Process Shipment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Import JSON Modal -->
+    <div id="importModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📂 Import JSON File</h2>
+                <span class="close" onclick="closeImportModal()">&times;</span>
+            </div>
+            <form id="importForm" onsubmit="handleImport(event)">
+                <div class="form-group">
+                    <label for="jsonFile">Select JSON File</label>
+                    <input type="file" id="jsonFile" accept=".json,application/json" required onchange="previewJSON()">
+                </div>
+                <div id="jsonPreview" style="display: none; margin: 15px 0;">
+                    <label>Preview (first 3 records):</label>
+                    <pre id="jsonPreviewContent" style="background: #f7fafc; padding: 15px; border-radius: 6px; max-height: 300px; overflow: auto; font-size: 12px;"></pre>
+                    <p id="recordCount" style="margin-top: 10px; font-weight: 600;"></p>
+                </div>
+                <div id="importProgress" style="display: none; margin: 15px 0;">
+                    <div style="background: #e2e8f0; border-radius: 6px; height: 30px; overflow: hidden;">
+                        <div id="importProgressBar" style="background: #48bb78; height: 100%; width: 0%; transition: width 0.3s; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px;"></div>
+                    </div>
+                    <p id="importStatus" style="margin-top: 10px; text-align: center;"></p>
+                </div>
+                <button type="submit" class="btn btn-primary" id="importButton" style="width: 100%;">Import to Airtable</button>
             </form>
         </div>
     </div>
@@ -1071,10 +1100,22 @@
             document.getElementById('productModal').style.display = 'none';
         }
 
+        function openImportModal() {
+            document.getElementById('importModal').style.display = 'block';
+            document.getElementById('importForm').reset();
+            document.getElementById('jsonPreview').style.display = 'none';
+            document.getElementById('importProgress').style.display = 'none';
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModal').style.display = 'none';
+        }
+
         window.onclick = function(event) {
             const productModal = document.getElementById('productModal');
             const inventoryModal = document.getElementById('inventoryModal');
             const shipmentModal = document.getElementById('shipmentModal');
+            const importModal = document.getElementById('importModal');
             if (event.target == productModal) {
                 closeModal();
             }
@@ -1083,6 +1124,9 @@
             }
             if (event.target == shipmentModal) {
                 closeShipmentModal();
+            }
+            if (event.target == importModal) {
+                closeImportModal();
             }
         }
 
@@ -1544,6 +1588,162 @@
                 }
             }
         });
+
+        // ============================================
+        // JSON IMPORT
+        // ============================================
+
+        let importData = null;
+
+        function previewJSON() {
+            const fileInput = document.getElementById('jsonFile');
+            const file = fileInput.files[0];
+
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const jsonData = JSON.parse(e.target.result);
+
+                    // Handle both array and object with array property
+                    let records = Array.isArray(jsonData) ? jsonData :
+                                  (jsonData.products ? jsonData.products :
+                                  (jsonData.records ? jsonData.records :
+                                  (jsonData.data ? jsonData.data : [])));
+
+                    if (!Array.isArray(records) || records.length === 0) {
+                        alert('Invalid JSON format. Expected an array of records.');
+                        return;
+                    }
+
+                    importData = records;
+
+                    // Show preview of first 3 records
+                    const preview = records.slice(0, 3);
+                    document.getElementById('jsonPreviewContent').textContent = JSON.stringify(preview, null, 2);
+                    document.getElementById('recordCount').textContent = `✓ Found ${records.length} record(s) to import`;
+                    document.getElementById('jsonPreview').style.display = 'block';
+
+                } catch (error) {
+                    alert('Error parsing JSON file: ' + error.message);
+                    fileInput.value = '';
+                    importData = null;
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        async function handleImport(event) {
+            event.preventDefault();
+
+            if (!importData || importData.length === 0) {
+                alert('No data to import. Please select a valid JSON file.');
+                return;
+            }
+
+            const importButton = document.getElementById('importButton');
+            const progressDiv = document.getElementById('importProgress');
+            const progressBar = document.getElementById('importProgressBar');
+            const statusText = document.getElementById('importStatus');
+
+            importButton.disabled = true;
+            progressDiv.style.display = 'block';
+
+            setSyncStatus('syncing');
+
+            try {
+                let successCount = 0;
+                let errorCount = 0;
+                const total = importData.length;
+
+                // Process in batches of 10 (Airtable limit)
+                for (let i = 0; i < importData.length; i += 10) {
+                    const batch = importData.slice(i, i + 10);
+
+                    // Map JSON fields to Airtable fields
+                    const records = batch.map(item => ({
+                        fields: {
+                            PartNumber: item.partNumber || item.PartNumber || '',
+                            Description: item.description || item.Description || '',
+                            OpenPO: parseInt(item.openPO || item.OpenPO || 0),
+                            BoxSize: item.boxSize || item.BoxSize || '',
+                            CasePack: item.casePack || item.CasePack || '',
+                            BackerStock: parseInt(item.backerStock || item.BackerStock || 0),
+                            AmountNeeded: parseInt(item.amountNeeded || item.AmountNeeded || 0),
+                            Priority: item.priority || item.Priority || 'none',
+                            SortOrder: item.sortOrder || item.SortOrder || i + successCount
+                        }
+                    }));
+
+                    try {
+                        const response = await fetch(AIRTABLE_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ records: records })
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            console.error('Batch error:', errorData);
+                            errorCount += batch.length;
+                        } else {
+                            successCount += batch.length;
+                        }
+                    } catch (error) {
+                        console.error('Network error:', error);
+                        errorCount += batch.length;
+                    }
+
+                    // Update progress
+                    const progress = Math.round(((i + batch.length) / total) * 100);
+                    progressBar.style.width = progress + '%';
+                    progressBar.textContent = progress + '%';
+                    statusText.textContent = `Imported ${successCount} of ${total} records...`;
+
+                    // Small delay to avoid rate limiting
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+
+                // Final status
+                setSyncStatus('connected');
+                progressBar.style.width = '100%';
+                progressBar.textContent = '100%';
+
+                if (errorCount === 0) {
+                    statusText.textContent = `✓ Successfully imported all ${successCount} records!`;
+                    statusText.style.color = '#48bb78';
+                    showToast(`✓ Imported ${successCount} records successfully!`);
+
+                    // Add history entry
+                    addHistory('import', `Imported ${successCount} products from JSON`);
+                    renderHistory();
+
+                    // Refresh data and close modal after 2 seconds
+                    setTimeout(async () => {
+                        await fetchProducts();
+                        renderProducts();
+                        closeImportModal();
+                    }, 2000);
+                } else {
+                    statusText.textContent = `⚠ Imported ${successCount} records, ${errorCount} failed. Check console for details.`;
+                    statusText.style.color = '#f6ad55';
+                    showToast(`⚠ Import completed with ${errorCount} errors`, true);
+                }
+
+            } catch (error) {
+                console.error('Import error:', error);
+                setSyncStatus('error');
+                statusText.textContent = '✗ Import failed: ' + error.message;
+                statusText.style.color = '#f56565';
+                showToast('✗ Import failed!', true);
+            } finally {
+                importButton.disabled = false;
+            }
+        }
 
         // ============================================
         // PDF GENERATION
