@@ -1578,10 +1578,18 @@ h<!DOCTYPE html>
                                 size: landscape;
                                 margin: 0.5in;
                             }
+                            * {
+                                -webkit-print-color-adjust: exact !important;
+                                print-color-adjust: exact !important;
+                                color-adjust: exact !important;
+                            }
                         }
                         body {
                             font-family: Arial, sans-serif;
                             padding: 20px;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                            color-adjust: exact;
                         }
                         h1 {
                             color: #667eea;
