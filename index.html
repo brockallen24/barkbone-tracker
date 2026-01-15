@@ -1607,25 +1607,34 @@ h<!DOCTYPE html>
                             margin-top: 20px;
                         }
                         th {
-                            background: #667eea;
-                            color: white;
+                            background: #667eea !important;
+                            color: white !important;
                             padding: 12px;
                             text-align: left;
                             font-weight: 600;
                             border: 1px solid #5568d3;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                            color-adjust: exact !important;
                         }
                         td {
                             padding: 10px 12px;
                             border: 1px solid #e2e8f0;
                         }
                         tr:nth-child(even) {
-                            background: #f7fafc;
+                            background: #f7fafc !important;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                            color-adjust: exact !important;
                         }
                         .part-number {
                             font-weight: 700;
                             padding: 6px 10px;
                             border-radius: 4px;
                             display: inline-block;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                            color-adjust: exact !important;
                         }
                         .priority {
                             font-weight: 700;
@@ -1633,24 +1642,30 @@ h<!DOCTYPE html>
                             border-radius: 4px;
                             display: inline-block;
                             text-transform: uppercase;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                            color-adjust: exact !important;
                         }
                         .backer-status {
                             font-weight: 700;
                             padding: 6px 10px;
                             border-radius: 4px;
                             display: inline-block;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                            color-adjust: exact !important;
                         }
                         .status-positive {
-                            background: #c6f6d5;
-                            color: #22543d;
+                            background: #c6f6d5 !important;
+                            color: #22543d !important;
                         }
                         .status-negative {
-                            background: #fc8181;
-                            color: white;
+                            background: #fc8181 !important;
+                            color: white !important;
                         }
                         .status-zero {
-                            background: #e2e8f0;
-                            color: #4a5568;
+                            background: #e2e8f0 !important;
+                            color: #4a5568 !important;
                         }
                         .footer {
                             margin-top: 40px;
@@ -1697,17 +1712,28 @@ h<!DOCTYPE html>
                                     }
                                 }
 
+                                // Get background colors for backer status
+                                let statusBgColor = '#e2e8f0';
+                                let statusTextColor = '#4a5568';
+                                if (backerStatus < 0) {
+                                    statusBgColor = '#fc8181';
+                                    statusTextColor = 'white';
+                                } else if (backerStatus > 0) {
+                                    statusBgColor = '#c6f6d5';
+                                    statusTextColor = '#22543d';
+                                }
+
                                 return `
                                     <tr>
                                         <td>${index + 1}</td>
                                         <td>
-                                            <span class="part-number" style="background: ${priorityColors[priority]}; color: ${priorityTextColors[priority]};">
+                                            <span class="part-number" style="background: ${priorityColors[priority]} !important; color: ${priorityTextColors[priority]} !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;">
                                                 ${product.partNumber}
                                             </span>
                                         </td>
                                         <td>${product.description}</td>
                                         <td>
-                                            <span class="priority" style="background: ${priorityColors[priority]}; color: ${priorityTextColors[priority]};">
+                                            <span class="priority" style="background: ${priorityColors[priority]} !important; color: ${priorityTextColors[priority]} !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;">
                                                 ${priority.toUpperCase()}
                                             </span>
                                         </td>
@@ -1716,7 +1742,7 @@ h<!DOCTYPE html>
                                         <td>${product.casePack || '-'}</td>
                                         <td>${product.backerStock || '-'}</td>
                                         <td>
-                                            <span class="backer-status ${statusClass}">${statusDisplay}</span>
+                                            <span class="backer-status ${statusClass}" style="background: ${statusBgColor} !important; color: ${statusTextColor} !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;">${statusDisplay}</span>
                                         </td>
                                         <td>${product.amountNeeded || '-'}</td>
                                     </tr>
