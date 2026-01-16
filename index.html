@@ -650,7 +650,7 @@ h<!DOCTYPE html>
                 </div>
                 <div class="form-group">
                     <label for="amountNeeded">Amount Needed</label>
-                    <input type="number" id="AmountNeeded" min="0">
+                    <input type="text" id="AmountNeeded">
                 </div>
                 <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%;">Add Product</button>
             </form>
@@ -877,7 +877,7 @@ h<!DOCTYPE html>
                                 BoxSize: productData.boxSize || null,
                                 CasePack: productData.casePack ? parseInt(productData.casePack) : null,
                                 BackerStock: productData.backerStock ? parseInt(productData.backerStock) : null,
-                                AmountNeeded: productData.amountNeeded ? parseInt(productData.amountNeeded) : null,
+                                AmountNeeded: productData.amountNeeded || null,
                                 Priority: productData.priority || 'none',
                                 SortOrder: products.length
                             }
@@ -918,7 +918,7 @@ h<!DOCTYPE html>
                                 BoxSize: productData.boxSize || null,
                                 CasePack: productData.casePack ? parseInt(productData.casePack) : null,
                                 BackerStock: productData.backerStock ? parseInt(productData.backerStock) : null,
-                                AmountNeeded: productData.amountNeeded ? parseInt(productData.amountNeeded) : null,
+                                AmountNeeded: productData.amountNeeded || null,
                                 Priority: productData.priority || 'none'
                             }
                         }]
