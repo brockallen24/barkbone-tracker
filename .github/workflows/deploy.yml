@@ -14,7 +14,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Generate config.js and deploy to Heroku
+      - name: Set Heroku config vars and deploy
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
@@ -22,11 +22,13 @@ jobs:
           AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
           AIRTABLE_TABLE_ID: ${{ secrets.AIRTABLE_TABLE_ID }}
         run: |
-          echo "const AIRTABLE_CONFIG = { apiKey: '${AIRTABLE_API_KEY}', baseId: '${AIRTABLE_BASE_ID}', tableId: '${AIRTABLE_TABLE_ID}' };" > config.js
-          cat config.js
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add -f config.js
-          git commit -m "Add config.js for deployment" || true
-          git remote add heroku https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git
+          # Set Heroku environment variables
+          curl -X PATCH https://api.heroku.com/apps/${HEROKU_APP_NAME}/config-vars \
+            -H "Accept: application/vnd.heroku+json; version=3" \
+            -H "Authorization: Bearer ${HEROKU_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{\"AIRTABLE_API_KEY\":\"${AIRTABLE_API_KEY}\",\"AIRTABLE_BASE_ID\":\"${AIRTABLE_BASE_ID}\",\"AIRTABLE_TABLE_ID\":\"${AIRTABLE_TABLE_ID}\"}"
+
+          # Deploy to Heroku
+          git remote add heroku https://heroku:${HEROKU_API_KEY}@git.heroku.com/${HEROKU_APP_NAME}.git || true
           git push heroku HEAD:main --force
