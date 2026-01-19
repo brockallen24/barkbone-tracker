@@ -1,6 +1,6 @@
 <?php
 // Check if requesting config.js
-if (pathinfo($_SERVER['REQUEST_URI'], PATHINFO_FILENAME) === 'config.js') {
+if (strpos($_SERVER['REQUEST_URI'], 'config.js') !== false) {
       header('Content-Type: application/javascript');
       echo 'const AIRTABLE_CONFIG = {' . "\n";
       echo "  baseId: '" . getenv('AIRTABLE_BASE_ID') . "'," . "\n";
